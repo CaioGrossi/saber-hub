@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Meus certificados | SaberHub{% endblock %}
+
+{% block page_class %}page-app{% endblock %}
+
+{% block content %}
+<section class="shell">
+    <div class="topbar">
+        <div>
+            <p class="eyebrow">SaberHub</p>
+            <h1>Meus certificados</h1>
+        </div>
+
+        <div class="topbar-actions">
+            <a class="button button-secondary" href="{% url 'home' %}">Inicio</a>
+            <a class="button button-secondary" href="{% url 'enrolled_course_list' %}">Meus cursos</a>
+            <a class="button button-secondary" href="{% url 'student_report' %}">Informes</a>
+            <a class="button button-secondary" href="{% url 'profile' %}">Perfil</a>
+        </div>
+    </div>
+
+    <div class="section-heading">
+        <div>
+            <h2>Certificados emitidos</h2>
+            <p class="muted">Veja os cursos que voce concluiu na plataforma.</p>
+        </div>
+    </div>
+
+    {% if certificates %}
+        <div class="certificate-list">
+            {% for certificate in certificates %}
+                <article class="certificate-item">
+                    <div>
+                        <span>Certificado</span>
+                        <h2>{{ certificate.course.title }}</h2>
+                    </div>
+                    <p>{{ certificate.display_text }}</p>
+                    <dl class="certificate-meta">
+                        <div>
+                            <dt>Aluno</dt>
+                            <dd>{{ certificate.student.get_full_name|default:certificate.student.username }}</dd>
+                        </div>
+                        <div>
+                            <dt>Curso</dt>
+                            <dd>{{ certificate.course.title }}</dd>
+                        </div>
+                        <div>
+                            <dt>Emissao</dt>
+                            <dd>{{ certificate.created_at|date:"d/m/Y" }}</dd>
+                        </div>
+                    </dl>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="panel">
+            <h2>Nenhum certificado emitido</h2>
+            <p class="muted">Quando voce concluir todos os materiais de um curso, seu certificado aparecera aqui.</p>
+            <a class="button" href="{% url 'enrolled_course_list' %}">Ver meus cursos</a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

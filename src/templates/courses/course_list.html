@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Meus cursos | SaberHub{% endblock %}
+
+{% block page_class %}page-app{% endblock %}
+
+{% block content %}
+<section class="shell">
+    <div class="topbar">
+        <div>
+            <p class="eyebrow">SaberHub</p>
+            <h1>Meus cursos</h1>
+        </div>
+
+        <div class="topbar-actions">
+            <a class="button button-secondary" href="{% url 'teacher_report' %}">Informes</a>
+            <a class="button" href="{% url 'create_course' %}">Criar curso</a>
+            <a class="button button-secondary" href="{% url 'home' %}">Inicio</a>
+        </div>
+    </div>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form class="search-form" method="get">
+        <label for="course-search">Buscar curso por nome</label>
+        <div class="search-actions">
+            <input
+                id="course-search"
+                name="q"
+                type="search"
+                value="{{ search_query }}"
+                placeholder="Digite o nome do curso"
+            >
+            <button class="button" type="submit">Buscar</button>
+            {% if search_query %}
+                <a class="button button-secondary" href="{% url 'course_list' %}">Limpar</a>
+            {% endif %}
+        </div>
+    </form>
+
+    {% if courses %}
+        <div class="course-list">
+            {% for course in courses %}
+                <article class="course-item">
+                    <div>
+                        <h2>{{ course.title }}</h2>
+                    </div>
+                    <p>{{ course.description }}</p>
+                    <a class="button button-secondary" href="{% url 'course_detail' course.id %}">Abrir curso</a>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="panel">
+            {% if search_query %}
+                <h2>Nenhum curso encontrado</h2>
+                <p>Nenhum curso criado por voce corresponde a "{{ search_query }}".</p>
+            {% else %}
+                <h2>Nenhum curso criado</h2>
+                <p>Quando voce criar um curso, ele aparecera nesta lista.</p>
+            {% endif %}
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

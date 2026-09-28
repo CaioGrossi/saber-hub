@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ course.title }} | SaberHub{% endblock %}
+
+{% block page_class %}page-app{% endblock %}
+
+{% block content %}
+<section class="shell">
+    <div class="topbar">
+        <div>
+            <p class="eyebrow">SaberHub</p>
+            <h1>{{ course.title }}</h1>
+        </div>
+
+        <div class="topbar-actions">
+            <a class="button button-secondary" href="{% url 'home' %}">Inicio</a>
+            <a class="button button-secondary" href="{% url 'profile' %}">Perfil</a>
+        </div>
+    </div>
+
+    <div class="course-detail-layout">
+        <section class="panel course-detail-summary">
+            <h2>Descricao do curso</h2>
+            <p>{{ course.description }}</p>
+            <p class="course-teacher">Professor: {{ course.teacher.get_full_name|default:course.teacher.username }}</p>
+            {% if enrollment %}
+                <p class="course-progress">
+                    Progresso: {{ completed_count }}/{{ total_materials }}
+                    materiais ({{ progress_percentage }}%)
+                </p>
+                {% if certificate %}
+                    <p class="course-progress">Certificado emitido em {{ certificate.created_at|date:"d/m/Y" }}</p>
+                    <a class="button button-secondary" href="{% url 'certificate_list' %}">Ver certificados</a>
+                {% endif %}
+            {% else %}
+                <form method="post" action="{% url 'enroll_course' course.id %}">
+                    {% csrf_token %}
+                    <button class="button" type="submit">Inscrever-se</button>
+                </form>
+            {% endif %}
+        </section>
+
+        <section class="panel">
+            <div class="section-heading">
+                <div>
+                    <h2>Materiais</h2>
+                    <p class="muted">Arquivos disponiveis para este curso.</p>
+                </div>
+            </div>
+
+            {% if materials %}
+                <div class="material-list">
+                    {% for material in materials %}
+                        <article class="material-item">
+                            <div>
+                                <h3>{{ material.title }}</h3>
+                                <p>{{ material.description }}</p>
+                            </div>
+                            <div class="material-actions">
+                                {% if enrollment %}
+                                    {% if material.id in completed_material_ids %}
+                                        <span class="status-pill">Concluido</span>
+                                    {% endif %}
+                                    <a class="button button-secondary" href="{% url 'student_course_material_detail' course.id material.id %}">Ver material</a>
+                                {% else %}
+                                    <span class="muted">Inscreva-se para abrir este material.</span>
+                                {% endif %}
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="muted">Nenhum material cadastrado ainda.</p>
+            {% endif %}
+        </section>
+    </div>
+</section>
+{% endblock %}

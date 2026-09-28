@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Criar conta | SaberHub{% endblock %}
+
+{% block content %}
+<section class="auth-card">
+    <div class="screen-nav">
+        <a class="button button-secondary" href="{% url 'home' %}">Inicio</a>
+    </div>
+
+    <p class="eyebrow">SaberHub</p>
+    <h1>Criar conta</h1>
+    <p class="muted">Cadastre-se para comecar a usar a plataforma.</p>
+
+    <form method="post" class="form">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <label for="{{ form.username.id_for_label }}">Usuario</label>
+        {{ form.username }}
+        {{ form.username.errors }}
+
+        <label for="{{ form.first_name.id_for_label }}">Nome</label>
+        {{ form.first_name }}
+        {{ form.first_name.errors }}
+
+        <label for="{{ form.last_name.id_for_label }}">Sobrenome</label>
+        {{ form.last_name }}
+        {{ form.last_name.errors }}
+
+        <label for="{{ form.role.id_for_label }}">Tipo de conta</label>
+        {{ form.role }}
+        {{ form.role.errors }}
+
+        <label for="{{ form.college_choice.id_for_label }}">Faculdade</label>
+        {{ form.college_choice }}
+        {{ form.college_choice.errors }}
+
+        <div class="college-name-field" data-college-name-field>
+            <label for="{{ form.college.id_for_label }}">Nome da faculdade</label>
+            {{ form.college }}
+            {{ form.college.errors }}
+        </div>
+
+        <label for="{{ form.password1.id_for_label }}">Senha</label>
+        {{ form.password1 }}
+        {{ form.password1.errors }}
+
+        <label for="{{ form.password2.id_for_label }}">Confirmar senha</label>
+        {{ form.password2 }}
+        {{ form.password2.errors }}
+
+        <button class="button" type="submit">Criar conta</button>
+    </form>
+
+    <p class="switch-link">
+        Ja tem uma conta?
+        <a href="{% url 'login' %}">Entrar</a>
+    </p>
+</section>
+{% endblock %}

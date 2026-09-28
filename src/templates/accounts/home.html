@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}SaberHub{% endblock %}
+
+{% block page_class %}page-app{% endblock %}
+
+{% block content %}
+<section class="shell">
+    <div class="topbar">
+        <div>
+            <p class="eyebrow">SaberHub</p>
+            <h1>Bem-vindo, {{ request.user.username }}</h1>
+        </div>
+
+        <div class="topbar-actions">
+            {% if request.user.role == 'teacher' %}
+                <a class="button button-secondary" href="{% url 'course_list' %}">Meus cursos</a>
+                <a class="button button-secondary" href="{% url 'teacher_report' %}">Informes</a>
+                <a class="button" href="{% url 'create_course' %}">Criar curso</a>
+            {% else %}
+                <a class="button button-secondary" href="{% url 'enrolled_course_list' %}">Meus cursos</a>
+                <a class="button button-secondary" href="{% url 'student_report' %}">Informes</a>
+                <a class="button button-secondary" href="{% url 'certificate_list' %}">Certificados</a>
+            {% endif %}
+
+            <a class="button button-secondary" href="{% url 'profile' %}">Perfil</a>
+
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button class="button button-secondary" type="submit">Sair</button>
+            </form>
+        </div>
+    </div>
+
+    {% if request.user.role == 'student' %}
+        <div class="section-heading">
+            <div>
+                <h2>Cursos disponiveis</h2>
+                <p class="muted">Veja os cursos cadastrados pelos professores da plataforma.</p>
+            </div>
+        </div>
+
+        <form class="search-form" method="get">
+            <label for="available-course-search">Buscar curso por nome</label>
+            <div class="search-actions">
+                <input
+                    id="available-course-search"
+                    name="q"
+                    type="search"
+                    value="{{ search_query }}"
+                    placeholder="Digite o nome do curso"
+                >
+                <button class="button" type="submit">Buscar</button>
+                {% if search_query %}
+                    <a class="button button-secondary" href="{% url 'home' %}">Limpar</a>
+                {% endif %}
+            </div>
+        </form>
+
+        {% if courses %}
+            <div class="course-list">
+                {% for course in courses %}
+                    <article class="course-item">
+                        <div>
+                            <h2>{{ course.title }}</h2>
+                        </div>
+                        <p>{{ course.description }}</p>
+                        <p class="course-teacher">Professor: {{ course.teacher.get_full_name|default:course.teacher.username }}</p>
+                        {% if course.is_enrolled %}
+                            <p class="course-progress">
+                                Progresso: {{ course.completed_materials_count }}/{{ course.total_materials }}
+                                materiais ({{ course.progress_percentage }}%)
+                            </p>
+                            <a class="button button-secondary" href="{% url 'student_course_detail' course.id %}">Continuar curso</a>
+                        {% else %}
+                            <form method="post" action="{% url 'enroll_course' course.id %}">
+                                {% csrf_token %}
+                                <button class="button" type="submit">Inscrever-se</button>
+                            </form>
+                            <a class="button button-secondary" href="{% url 'student_course_detail' course.id %}">Ver detalhes</a>
+                        {% endif %}
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="panel">
+                {% if search_query %}
+                    <h2>Nenhum curso encontrado</h2>
+                    <p>Nenhum curso disponivel corresponde a "{{ search_query }}".</p>
+                {% else %}
+                    <h2>Nenhum curso disponivel</h2>
+                    <p>Quando professores criarem cursos, eles aparecerao aqui.</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="panel">
+            <h2>Plataforma de cursos</h2>
+            <p>
+                Este e o inicio do SaberHub. Aqui professores poderao criar cursos
+                e estudantes poderao encontrar aulas por tema.
+            </p>
+            <p>
+                Seu perfil atual: {{ request.user.get_role_display }} -
+                {{ request.user.college }}
+            </p>
+            <p>
+                Use os atalhos acima para criar cursos e acompanhar os cursos que voce ja cadastrou.
+            </p>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

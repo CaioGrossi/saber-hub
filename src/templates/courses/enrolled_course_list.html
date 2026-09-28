@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Meus cursos | SaberHub{% endblock %}
+
+{% block page_class %}page-app{% endblock %}
+
+{% block content %}
+<section class="shell">
+    <div class="topbar">
+        <div>
+            <p class="eyebrow">SaberHub</p>
+            <h1>Meus cursos</h1>
+        </div>
+
+        <div class="topbar-actions">
+            <a class="button button-secondary" href="{% url 'home' %}">Inicio</a>
+            <a class="button button-secondary" href="{% url 'student_report' %}">Informes</a>
+            <a class="button button-secondary" href="{% url 'certificate_list' %}">Certificados</a>
+            <a class="button button-secondary" href="{% url 'profile' %}">Perfil</a>
+        </div>
+    </div>
+
+    <div class="section-heading">
+        <div>
+            <h2>Cursos inscritos</h2>
+            <p class="muted">Acompanhe os cursos em que voce esta inscrito.</p>
+        </div>
+    </div>
+
+    <form class="search-form" method="get">
+        <label for="enrolled-course-search">Buscar curso por nome</label>
+        <div class="search-actions">
+            <input
+                id="enrolled-course-search"
+                name="q"
+                type="search"
+                value="{{ search_query }}"
+                placeholder="Digite o nome do curso"
+            >
+            <button class="button" type="submit">Buscar</button>
+            {% if search_query %}
+                <a class="button button-secondary" href="{% url 'enrolled_course_list' %}">Limpar</a>
+            {% endif %}
+        </div>
+    </form>
+
+    {% if courses %}
+        <div class="course-list">
+            {% for course in courses %}
+                <article class="course-item">
+                    <div>
+                        <h2>{{ course.title }}</h2>
+                    </div>
+                    <p>{{ course.description }}</p>
+                    <p class="course-teacher">Professor: {{ course.teacher.get_full_name|default:course.teacher.username }}</p>
+                    <p class="course-progress">
+                        Progresso: {{ course.completed_materials_count }}/{{ course.total_materials }}
+                        materiais ({{ course.progress_percentage }}%)
+                    </p>
+                    <a class="button button-secondary" href="{% url 'student_course_detail' course.id %}">Continuar curso</a>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="panel">
+            {% if search_query %}
+                <h2>Nenhum curso encontrado</h2>
+                <p class="muted">Nenhum curso inscrito corresponde a "{{ search_query }}".</p>
+            {% else %}
+                <h2>Nenhum curso inscrito</h2>
+                <p class="muted">Quando voce se inscrever em um curso, ele aparecera aqui.</p>
+                <a class="button" href="{% url 'home' %}">Ver cursos disponiveis</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

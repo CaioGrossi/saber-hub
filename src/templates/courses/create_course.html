@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Criar curso | SaberHub{% endblock %}
+
+{% block page_class %}page-app{% endblock %}
+
+{% block content %}
+<section class="shell">
+    <div class="topbar">
+        <div>
+            <p class="eyebrow">SaberHub</p>
+            <h1>Criar curso</h1>
+        </div>
+
+        <div class="topbar-actions">
+            <a class="button button-secondary" href="{% url 'course_list' %}">Meus cursos</a>
+            <a class="button button-secondary" href="{% url 'home' %}">Inicio</a>
+        </div>
+    </div>
+
+    <div class="course-form-layout">
+        <aside class="course-form-summary">
+            <h2>Novo curso</h2>
+            <p>Preencha os dados principais para cadastrar o curso no seu perfil de professor.</p>
+        </aside>
+
+        <div class="course-form-area">
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <form method="post" class="form course-form">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+
+                <label for="{{ form.title.id_for_label }}">Titulo</label>
+                {{ form.title }}
+                {{ form.title.errors }}
+
+                <label for="{{ form.description.id_for_label }}">Descricao</label>
+                {{ form.description }}
+                {{ form.description.errors }}
+
+                <div class="form-actions">
+                    <a class="button button-secondary" href="{% url 'course_list' %}">Cancelar</a>
+                    <button class="button" type="submit">Criar curso</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

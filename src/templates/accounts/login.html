@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Entrar | SaberHub{% endblock %}
+
+{% block content %}
+<section class="auth-card">
+    <div class="screen-nav">
+        <a class="button button-secondary" href="{% url 'home' %}">Inicio</a>
+    </div>
+
+    <p class="eyebrow">SaberHub</p>
+    <h1>Entrar</h1>
+    <p class="muted">Acesse sua conta para continuar.</p>
+
+    <form method="post" class="form">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <label for="{{ form.username.id_for_label }}">Usuario</label>
+        {{ form.username }}
+        {{ form.username.errors }}
+
+        <label for="{{ form.password.id_for_label }}">Senha</label>
+        {{ form.password }}
+        {{ form.password.errors }}
+
+        <button class="button" type="submit">Entrar</button>
+    </form>
+
+    <p class="switch-link">
+        Ainda nao tem conta?
+        <a href="{% url 'register' %}">Criar conta</a>
+    </p>
+</section>
+{% endblock %}

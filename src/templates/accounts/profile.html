@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Perfil | SaberHub{% endblock %}
+
+{% block page_class %}page-app{% endblock %}
+
+{% block content %}
+<section class="auth-card app-screen">
+    <div class="screen-nav">
+        <a class="button button-secondary" href="{% url 'home' %}">Inicio</a>
+    </div>
+
+    <p class="eyebrow">SaberHub</p>
+    <h1>Perfil</h1>
+    <p class="muted">Veja seus dados atuais e altere as informacoes quando precisar.</p>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div class="profile-summary">
+        <div class="profile-item">
+            <span>Nome atual</span>
+            <strong>
+                {% if request.user.first_name or request.user.last_name %}
+                    {{ request.user.first_name }} {{ request.user.last_name }}
+                {% else %}
+                    Nao informado
+                {% endif %}
+            </strong>
+        </div>
+
+        <div class="profile-item">
+            <span>Tipo de conta</span>
+            <strong>{{ request.user.get_role_display }}</strong>
+        </div>
+
+        <div class="profile-item">
+            <span>Faculdade atual</span>
+            <strong>{{ request.user.college }}</strong>
+        </div>
+    </div>
+
+    <div class="form-heading">
+        <h2>Alterar dados</h2>
+        <p class="muted">Seu tipo de conta nao pode ser alterado por aqui.</p>
+    </div>
+
+    <form method="post" class="form">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <label for="{{ form.first_name.id_for_label }}">Nome</label>
+        {{ form.first_name }}
+        {{ form.first_name.errors }}
+
+        <label for="{{ form.last_name.id_for_label }}">Sobrenome</label>
+        {{ form.last_name }}
+        {{ form.last_name.errors }}
+
+        <label for="{{ form.college_choice.id_for_label }}">Faculdade</label>
+        {{ form.college_choice }}
+        {{ form.college_choice.errors }}
+
+        <div class="college-name-field" data-college-name-field>
+            <label for="{{ form.college.id_for_label }}">Nome da faculdade</label>
+            {{ form.college }}
+            {{ form.college.errors }}
+        </div>
+
+        <button class="button" type="submit">Salvar perfil</button>
+    </form>
+</section>
+{% endblock %}

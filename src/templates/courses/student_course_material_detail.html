@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ material.title }} | SaberHub{% endblock %}
+
+{% block page_class %}page-app{% endblock %}
+
+{% block content %}
+<section class="shell">
+    <div class="topbar">
+        <div>
+            <p class="eyebrow">{{ course.title }}</p>
+            <h1>{{ material.title }}</h1>
+        </div>
+
+        <div class="topbar-actions">
+            <a class="button button-secondary" href="{% url 'home' %}">Inicio</a>
+            <a class="button button-secondary" href="{% url 'student_course_detail' course.id %}">Curso</a>
+            <a class="button button-secondary" href="{% url 'profile' %}">Perfil</a>
+        </div>
+    </div>
+
+    <div class="material-detail-layout">
+        <section class="panel material-summary">
+            <h2>Material</h2>
+            <p>{{ material.description }}</p>
+            <p class="course-teacher">Professor: {{ course.teacher.get_full_name|default:course.teacher.username }}</p>
+            {% if is_completed %}
+                <p class="course-progress">Status: concluido</p>
+            {% else %}
+                <p class="muted">Status: pendente</p>
+            {% endif %}
+            <form method="post" action="{% url 'toggle_material_completion' course.id material.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="return_to" value="material">
+                {% if is_completed %}
+                    <button class="button button-secondary" type="submit">Marcar pendente</button>
+                {% else %}
+                    <button class="button" type="submit">Marcar concluido</button>
+                {% endif %}
+            </form>
+        </section>
+
+        <section class="panel material-viewer-panel">
+            <div class="material-viewer-actions">
+                <a class="button" href="{% url 'student_course_material_file' course.id material.id %}" target="_blank" rel="noopener">Abrir material em tela cheia</a>
+            </div>
+            {% if is_pdf %}
+                <iframe class="material-viewer material-viewer-pdf" src="{% url 'student_course_material_file' course.id material.id %}" title="{{ material.title }}"></iframe>
+            {% elif is_video %}
+                <video class="material-viewer material-viewer-video" controls controlsList="nodownload">
+                    <source src="{% url 'student_course_material_file' course.id material.id %}" type="video/mp4">
+                    Seu navegador nao suporta a reproducao deste video.
+                </video>
+            {% else %}
+                <div class="material-fallback">
+                    <h2>Arquivo do material</h2>
+                    <p class="muted">Este tipo de arquivo nao pode ser exibido diretamente.</p>
+                    <a class="button" href="{% url 'student_course_material_file' course.id material.id %}" target="_blank" rel="noopener">Abrir arquivo</a>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+</section>
+{% endblock %}

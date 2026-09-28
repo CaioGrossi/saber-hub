@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Informes do professor | SaberHub{% endblock %}
+
+{% block page_class %}page-app{% endblock %}
+
+{% block content %}
+<section class="shell">
+    <div class="topbar">
+        <div>
+            <p class="eyebrow">SaberHub</p>
+            <h1>Informes do professor</h1>
+        </div>
+
+        <div class="topbar-actions">
+            <a class="button button-secondary" href="{% url 'course_list' %}">Meus cursos</a>
+            <a class="button button-secondary" href="{% url 'home' %}">Inicio</a>
+        </div>
+    </div>
+
+    <section class="report-summary" aria-label="Resumo dos informes">
+        <article class="metric-card">
+            <span>Cursos criados</span>
+            <strong>{{ total_courses }}</strong>
+        </article>
+        <article class="metric-card">
+            <span>Inscricoes</span>
+            <strong>{{ total_enrollments }}</strong>
+        </article>
+        <article class="metric-card">
+            <span>Alunos unicos</span>
+            <strong>{{ total_students }}</strong>
+        </article>
+        <article class="metric-card">
+            <span>Alunos concluintes</span>
+            <strong>{{ completed_students_count }}</strong>
+        </article>
+        <article class="metric-card">
+            <span>Certificados emitidos</span>
+            <strong>{{ total_certificates }}</strong>
+        </article>
+    </section>
+
+    <section class="panel report-panel">
+        <div class="section-heading">
+            <div>
+                <h2>Cursos por desempenho</h2>
+                <p class="muted">Cursos ordenados por quantidade de alunos inscritos e concluintes.</p>
+            </div>
+        </div>
+
+        {% if course_rows %}
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Curso</th>
+                            <th>Materiais</th>
+                            <th>Alunos inscritos</th>
+                            <th>Alunos concluintes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for course in course_rows %}
+                            <tr>
+                                <td>{{ course.title }}</td>
+                                <td>{{ course.materials_count }}</td>
+                                <td>{{ course.enrolled_students }}</td>
+                                <td>{{ course.completed_students }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="muted">Nenhum curso criado ainda.</p>
+        {% endif %}
+    </section>
+
+    <section class="panel report-panel">
+        <div class="section-heading">
+            <div>
+                <h2>Cursos que precisam de atencao</h2>
+                <p class="muted">Cursos com alunos inscritos e taxa de conclusao abaixo de 50%.</p>
+            </div>
+        </div>
+
+        {% if attention_rows %}
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Curso</th>
+                            <th>Alunos inscritos</th>
+                            <th>Alunos concluintes</th>
+                            <th>Taxa de conclusao</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for course in attention_rows %}
+                            <tr>
+                                <td>{{ course.title }}</td>
+                                <td>{{ course.enrolled_students }}</td>
+                                <td>{{ course.completed_students }}</td>
+                                <td>{{ course.completion_rate }}%</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="muted">Nenhum curso com baixa taxa de conclusao no momento.</p>
+        {% endif %}
+    </section>
+
+    <section class="panel report-panel">
+        <div class="section-heading">
+            <div>
+                <h2>Alunos que concluiram cursos</h2>
+                <p class="muted">Alunos que finalizaram pelo menos um dos seus cursos.</p>
+            </div>
+        </div>
+
+        {% if student_rows %}
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Aluno</th>
+                            <th>Email</th>
+                            <th>Cursos concluidos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in student_rows %}
+                            <tr>
+                                <td>{{ student.get_full_name|default:student.username }}</td>
+                                <td>{{ student.email|default:"-" }}</td>
+                                <td>{{ student.completed_courses }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="muted">Nenhum aluno concluiu cursos seus ainda.</p>
+        {% endif %}
+    </section>
+</section>
+{% endblock %}

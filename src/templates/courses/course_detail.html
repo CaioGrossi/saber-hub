@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ course.title }} | SaberHub{% endblock %}
+
+{% block page_class %}page-app{% endblock %}
+
+{% block content %}
+<section class="shell">
+    <div class="topbar">
+        <div>
+            <p class="eyebrow">SaberHub</p>
+            <h1>{{ course.title }}</h1>
+        </div>
+
+        <div class="topbar-actions">
+            <a class="button button-secondary" href="{% url 'course_list' %}">Meus cursos</a>
+            <a class="button button-secondary" href="{% url 'home' %}">Inicio</a>
+        </div>
+    </div>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div class="course-detail-layout">
+        <section class="panel course-detail-summary">
+            <h2>Descricao do curso</h2>
+            <p>{{ course.description }}</p>
+        </section>
+
+        <section class="panel">
+            <div class="section-heading">
+                <div>
+                    <h2>Materiais</h2>
+                    <p class="muted">Arquivos cadastrados para este curso.</p>
+                </div>
+            </div>
+
+            {% if materials %}
+                <div class="material-list">
+                    {% for material in materials %}
+                        <article class="material-item">
+                            <div>
+                                <h3>{{ material.title }}</h3>
+                                <p>{{ material.description }}</p>
+                            </div>
+                            <a class="button button-secondary" href="{{ material.url.url }}" target="_blank" rel="noopener">Abrir arquivo</a>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="muted">Nenhum material cadastrado ainda.</p>
+            {% endif %}
+        </section>
+
+        <section class="panel">
+            <div class="section-heading">
+                <div>
+                    <h2>Adicionar material</h2>
+                    <p class="muted">Envie um arquivo .mp4 ou .pdf armazenado localmente.</p>
+                </div>
+            </div>
+
+            <form method="post" enctype="multipart/form-data" class="form material-form">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+
+                <label for="{{ form.title.id_for_label }}">Titulo</label>
+                {{ form.title }}
+                {{ form.title.errors }}
+
+                <label for="{{ form.description.id_for_label }}">Descricao</label>
+                {{ form.description }}
+                {{ form.description.errors }}
+
+                <label for="{{ form.url.id_for_label }}">Arquivo</label>
+                {{ form.url }}
+                {{ form.url.errors }}
+
+                <div class="form-actions">
+                    <button class="button" type="submit">Adicionar material</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</section>
+{% endblock %}
