@@ -6,15 +6,14 @@
 
 {% block content %}
 <section class="shell">
-    <div class="topbar">
-        <div>
-            <p class="eyebrow">SaberHub</p>
+    <div class="page-hero">
+        <div class="hero-content">
+            <span class="hero-badge">Gerenciamento de Curso</span>
             <h1>{{ course.title }}</h1>
+            <p class="hero-subtext">{{ course.description }}</p>
         </div>
-
-        <div class="topbar-actions">
-            <a class="button button-secondary" href="{% url 'course_list' %}">Meus cursos</a>
-            <a class="button button-secondary" href="{% url 'home' %}">Inicio</a>
+        <div class="hero-actions">
+            <a class="button button-secondary" href="{% url 'course_list' %}">Voltar para meus cursos</a>
         </div>
     </div>
 
@@ -26,63 +25,87 @@
         </ul>
     {% endif %}
 
-    <div class="course-detail-layout">
-        <section class="panel course-detail-summary">
-            <h2>Descricao do curso</h2>
-            <p>{{ course.description }}</p>
-        </section>
-
-        <section class="panel">
-            <div class="section-heading">
+    <div class="split-management-grid">
+        <section class="panel-card materials-panel">
+            <div class="panel-card-header">
                 <div>
-                    <h2>Materiais</h2>
-                    <p class="muted">Arquivos cadastrados para este curso.</p>
+                    <h2>Materiais da Disciplina</h2>
+                    <p class="muted">Arquivos disponíveis para os estudantes matriculados.</p>
                 </div>
+                <span class="badge-count">{{ materials.count }} materiais</span>
             </div>
 
             {% if materials %}
-                <div class="material-list">
+                <div class="material-list-modern">
                     {% for material in materials %}
-                        <article class="material-item">
-                            <div>
-                                <h3>{{ material.title }}</h3>
-                                <p>{{ material.description }}</p>
+                        <article class="material-row-card">
+                            <div class="material-icon-bubble">
+                                📄
                             </div>
-                            <a class="button button-secondary" href="{{ material.url.url }}" target="_blank" rel="noopener">Abrir arquivo</a>
+                            <div class="material-row-info">
+                                <h3>{{ material.title }}</h3>
+                                <p class="muted">{{ material.description }}</p>
+                            </div>
+                            <a class="button button-sm button-secondary" href="{{ material.url.url }}" target="_blank" rel="noopener">
+                                Visualizar
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                                    <polyline points="15 3 21 3 21 9"/>
+                                    <line x1="10" y1="14" x2="21" y2="3"/>
+                                </svg>
+                            </a>
                         </article>
                     {% endfor %}
                 </div>
             {% else %}
-                <p class="muted">Nenhum material cadastrado ainda.</p>
+                <div class="empty-state-mini">
+                    <p class="muted">Nenhum material adicionado a este curso até o momento.</p>
+                </div>
             {% endif %}
         </section>
 
-        <section class="panel">
-            <div class="section-heading">
+        <section class="panel-card upload-panel">
+            <div class="panel-card-header">
                 <div>
-                    <h2>Adicionar material</h2>
-                    <p class="muted">Envie um arquivo .mp4 ou .pdf armazenado localmente.</p>
+                    <h2>Adicionar Material</h2>
+                    <p class="muted">Envie apostilas, slides em PDF ou aulas em vídeo (MP4).</p>
                 </div>
             </div>
 
-            <form method="post" enctype="multipart/form-data" class="form material-form">
+            <form method="post" enctype="multipart/form-data" class="app-form">
                 {% csrf_token %}
-                {{ form.non_field_errors }}
+                {% if form.non_field_errors %}
+                    <div class="alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
 
-                <label for="{{ form.title.id_for_label }}">Titulo</label>
-                {{ form.title }}
-                {{ form.title.errors }}
+                <div class="form-group">
+                    <label for="{{ form.title.id_for_label }}">Título do Material <span class="required">*</span></label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <span class="field-error">{{ form.title.errors|striptags }}</span>
+                    {% endif %}
+                </div>
 
-                <label for="{{ form.description.id_for_label }}">Descricao</label>
-                {{ form.description }}
-                {{ form.description.errors }}
+                <div class="form-group">
+                    <label for="{{ form.description.id_for_label }}">Descrição resumida <span class="required">*</span></label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <span class="field-error">{{ form.description.errors|striptags }}</span>
+                    {% endif %}
+                </div>
 
-                <label for="{{ form.url.id_for_label }}">Arquivo</label>
-                {{ form.url }}
-                {{ form.url.errors }}
+                <div class="form-group">
+                    <label for="{{ form.url.id_for_label }}">Arquivo (.pdf ou .mp4) <span class="required">*</span></label>
+                    <div class="file-input-wrapper">
+                        {{ form.url }}
+                    </div>
+                    {% if form.url.errors %}
+                        <span class="field-error">{{ form.url.errors|striptags }}</span>
+                    {% endif %}
+                </div>
 
-                <div class="form-actions">
-                    <button class="button" type="submit">Adicionar material</button>
+                <div class="form-buttons-row">
+                    <button class="button button-primary button-full" type="submit">Fazer upload de material</button>
                 </div>
             </form>
         </section>

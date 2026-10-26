@@ -1,75 +1,110 @@
 {% extends 'base.html' %}
 
-{% block title %}Meus cursos | SaberHub{% endblock %}
+{% block title %}Meus Cursos Inscritos | SaberHub{% endblock %}
 
 {% block page_class %}page-app{% endblock %}
 
 {% block content %}
 <section class="shell">
-    <div class="topbar">
-        <div>
-            <p class="eyebrow">SaberHub</p>
-            <h1>Meus cursos</h1>
+    <div class="page-hero">
+        <div class="hero-content">
+            <span class="hero-badge">Área do Estudante</span>
+            <h1>Meus Cursos</h1>
+            <p class="hero-subtext">Acompanhe seu ritmo de aprendizado e continue de onde parou.</p>
         </div>
-
-        <div class="topbar-actions">
-            <a class="button button-secondary" href="{% url 'home' %}">Inicio</a>
-            <a class="button button-secondary" href="{% url 'student_report' %}">Informes</a>
-            <a class="button button-secondary" href="{% url 'certificate_list' %}">Certificados</a>
-            <a class="button button-secondary" href="{% url 'profile' %}">Perfil</a>
+        <div class="hero-actions">
+            <a class="button button-secondary" href="{% url 'home' %}">Explorar mais cursos</a>
+            <a class="button button-secondary" href="{% url 'certificate_list' %}">Ver certificados</a>
         </div>
     </div>
 
-    <div class="section-heading">
-        <div>
-            <h2>Cursos inscritos</h2>
-            <p class="muted">Acompanhe os cursos em que voce esta inscrito.</p>
+    <div class="section-toolbar">
+        <div class="section-heading">
+            <h2>Cursos em Andamento</h2>
+            <p class="muted">Gerencie seus cursos matriculados e conclua materiais para emitir certificados.</p>
         </div>
-    </div>
 
-    <form class="search-form" method="get">
-        <label for="enrolled-course-search">Buscar curso por nome</label>
-        <div class="search-actions">
-            <input
-                id="enrolled-course-search"
-                name="q"
-                type="search"
-                value="{{ search_query }}"
-                placeholder="Digite o nome do curso"
-            >
-            <button class="button" type="submit">Buscar</button>
-            {% if search_query %}
-                <a class="button button-secondary" href="{% url 'enrolled_course_list' %}">Limpar</a>
-            {% endif %}
-        </div>
-    </form>
+        <form class="search-form" method="get">
+            <div class="search-box">
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input
+                    id="enrolled-course-search"
+                    name="q"
+                    type="search"
+                    value="{{ search_query }}"
+                    placeholder="Filtrar meus cursos por nome..."
+                >
+                <button class="button button-sm button-primary" type="submit">Buscar</button>
+                {% if search_query %}
+                    <a class="button button-sm button-ghost" href="{% url 'enrolled_course_list' %}">Limpar</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
 
     {% if courses %}
-        <div class="course-list">
+        <div class="course-grid">
             {% for course in courses %}
-                <article class="course-item">
-                    <div>
-                        <h2>{{ course.title }}</h2>
+                <article class="course-card course-card-enrolled">
+                    <div class="card-header">
+                        <span class="course-chip course-chip-enrolled">
+                            {% if course.progress_percentage == 100 %}
+                                Concluído 🏆
+                            {% else %}
+                                Em andamento
+                            {% endif %}
+                        </span>
+                        <div class="teacher-chip" title="Professor responsável">
+                            <span class="teacher-avatar">{{ course.teacher.username|slice:":1"|upper }}</span>
+                            <span class="teacher-name">{{ course.teacher.get_full_name|default:course.teacher.username }}</span>
+                        </div>
                     </div>
-                    <p>{{ course.description }}</p>
-                    <p class="course-teacher">Professor: {{ course.teacher.get_full_name|default:course.teacher.username }}</p>
-                    <p class="course-progress">
-                        Progresso: {{ course.completed_materials_count }}/{{ course.total_materials }}
-                        materiais ({{ course.progress_percentage }}%)
-                    </p>
-                    <a class="button button-secondary" href="{% url 'student_course_detail' course.id %}">Continuar curso</a>
+
+                    <div class="card-body">
+                        <h3 class="course-title">{{ course.title }}</h3>
+                        <p class="course-desc">{{ course.description }}</p>
+                    </div>
+
+                    <div class="progress-container">
+                        <div class="progress-labels">
+                            <span class="progress-title">Progresso</span>
+                            <span class="progress-val">{{ course.progress_percentage }}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill {% if course.progress_percentage == 100 %}progress-fill-complete{% endif %}" style="width: {{ course.progress_percentage }}%;"></div>
+                        </div>
+                        <span class="progress-subtitle">{{ course.completed_materials_count }} de {{ course.total_materials }} materiais concluídos</span>
+                    </div>
+
+                    <div class="card-footer">
+                        <a class="button button-primary button-full" href="{% url 'student_course_detail' course.id %}">
+                            {% if course.progress_percentage == 100 %}
+                                Revisar curso
+                            {% else %}
+                                Continuar curso
+                            {% endif %}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </a>
+                    </div>
                 </article>
             {% endfor %}
         </div>
     {% else %}
-        <div class="panel">
+        <div class="empty-state-panel">
+            <div class="empty-state-icon">📖</div>
             {% if search_query %}
-                <h2>Nenhum curso encontrado</h2>
-                <p class="muted">Nenhum curso inscrito corresponde a "{{ search_query }}".</p>
+                <h3>Nenhum curso encontrado</h3>
+                <p class="muted">Nenhum curso matriculado corresponde à busca "{{ search_query }}".</p>
+                <a class="button button-secondary" href="{% url 'enrolled_course_list' %}">Limpar filtro</a>
             {% else %}
-                <h2>Nenhum curso inscrito</h2>
-                <p class="muted">Quando voce se inscrever em um curso, ele aparecera aqui.</p>
-                <a class="button" href="{% url 'home' %}">Ver cursos disponiveis</a>
+                <h3>Você ainda não está inscrito em nenhum curso</h3>
+                <p class="muted">Navegue pelo catálogo de cursos e comece a aprender hoje mesmo.</p>
+                <a class="button button-primary" href="{% url 'home' %}">Explorar cursos disponíveis</a>
             {% endif %}
         </div>
     {% endif %}

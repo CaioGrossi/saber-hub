@@ -6,73 +6,112 @@
 
 {% block content %}
 <section class="shell">
-    <div class="topbar">
-        <div>
-            <p class="eyebrow">SaberHub</p>
+    <div class="page-hero">
+        <div class="hero-content">
+            <span class="hero-badge">Detalhes da Disciplina</span>
             <h1>{{ course.title }}</h1>
+            <p class="hero-subtext">{{ course.description }}</p>
+            <div class="course-meta-pills">
+                <span class="meta-pill">
+                    <span class="meta-icon">👨‍🏫</span>
+                    Professor: <strong>{{ course.teacher.get_full_name|default:course.teacher.username }}</strong>
+                </span>
+                <span class="meta-pill">
+                    <span class="meta-icon">🏛️</span>
+                    Instituição: <strong>{{ course.teacher.college }}</strong>
+                </span>
+                <span class="meta-pill">
+                    <span class="meta-icon">📂</span>
+                    Conteúdo: <strong>{{ materials.count }} materiais</strong>
+                </span>
+            </div>
         </div>
 
-        <div class="topbar-actions">
-            <a class="button button-secondary" href="{% url 'home' %}">Inicio</a>
-            <a class="button button-secondary" href="{% url 'profile' %}">Perfil</a>
-        </div>
-    </div>
-
-    <div class="course-detail-layout">
-        <section class="panel course-detail-summary">
-            <h2>Descricao do curso</h2>
-            <p>{{ course.description }}</p>
-            <p class="course-teacher">Professor: {{ course.teacher.get_full_name|default:course.teacher.username }}</p>
+        <div class="hero-actions">
             {% if enrollment %}
-                <p class="course-progress">
-                    Progresso: {{ completed_count }}/{{ total_materials }}
-                    materiais ({{ progress_percentage }}%)
-                </p>
                 {% if certificate %}
-                    <p class="course-progress">Certificado emitido em {{ certificate.created_at|date:"d/m/Y" }}</p>
-                    <a class="button button-secondary" href="{% url 'certificate_list' %}">Ver certificados</a>
+                    <a class="button button-success" href="{% url 'certificate_list' %}">
+                        <span>🏆 Ver Certificado</span>
+                    </a>
                 {% endif %}
+                <a class="button button-secondary" href="{% url 'enrolled_course_list' %}">Meus Cursos</a>
             {% else %}
                 <form method="post" action="{% url 'enroll_course' course.id %}">
                     {% csrf_token %}
-                    <button class="button" type="submit">Inscrever-se</button>
+                    <button class="button button-primary button-lg" type="submit">Inscrever-se Gratuitamente</button>
                 </form>
             {% endif %}
-        </section>
+            <a class="button button-ghost" href="{% url 'home' %}">Voltar</a>
+        </div>
+    </div>
 
-        <section class="panel">
-            <div class="section-heading">
-                <div>
-                    <h2>Materiais</h2>
-                    <p class="muted">Arquivos disponiveis para este curso.</p>
+    {% if enrollment %}
+        <div class="enrollment-status-banner">
+            <div class="status-banner-info">
+                <h3>Seu Progresso no Curso</h3>
+                <p class="muted">Conclua todas as aulas e materiais para liberar a emissão do seu certificado oficial.</p>
+            </div>
+            <div class="status-banner-progress">
+                <div class="progress-labels">
+                    <span class="progress-title">{{ completed_count }} de {{ total_materials }} concluídos</span>
+                    <span class="progress-val">{{ progress_percentage }}%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill {% if progress_percentage == 100 %}progress-fill-complete{% endif %}" style="width: {{ progress_percentage }}%;"></div>
                 </div>
             </div>
+        </div>
+    {% endif %}
 
-            {% if materials %}
-                <div class="material-list">
-                    {% for material in materials %}
-                        <article class="material-item">
-                            <div>
+    <div class="course-content-section">
+        <div class="section-heading">
+            <h2>Materiais e Aulas</h2>
+            <p class="muted">Acesse as videoaulas e documentos recomendados pelo corpo docente.</p>
+        </div>
+
+        {% if materials %}
+            <div class="material-list-modern">
+                {% for material in materials %}
+                    <article class="material-row-card {% if material.id in completed_material_ids %}material-row-completed{% endif %}">
+                        <div class="material-status-indicator">
+                            {% if material.id in completed_material_ids %}
+                                <span class="check-bubble check-bubble-done" title="Material concluído">✓</span>
+                            {% else %}
+                                <span class="check-bubble" title="Pendente">○</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="material-row-info">
+                            <div class="material-title-row">
                                 <h3>{{ material.title }}</h3>
-                                <p>{{ material.description }}</p>
-                            </div>
-                            <div class="material-actions">
-                                {% if enrollment %}
-                                    {% if material.id in completed_material_ids %}
-                                        <span class="status-pill">Concluido</span>
-                                    {% endif %}
-                                    <a class="button button-secondary" href="{% url 'student_course_material_detail' course.id material.id %}">Ver material</a>
-                                {% else %}
-                                    <span class="muted">Inscreva-se para abrir este material.</span>
+                                {% if material.id in completed_material_ids %}
+                                    <span class="status-pill status-pill-success">Concluído</span>
                                 {% endif %}
                             </div>
-                        </article>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p class="muted">Nenhum material cadastrado ainda.</p>
-            {% endif %}
-        </section>
+                            <p class="muted">{{ material.description }}</p>
+                        </div>
+
+                        <div class="material-row-action">
+                            {% if enrollment %}
+                                <a class="button button-sm {% if material.id in completed_material_ids %}button-secondary{% else %}button-primary{% endif %}" href="{% url 'student_course_material_detail' course.id material.id %}">
+                                    {% if material.id in completed_material_ids %}
+                                        Rever material
+                                    {% else %}
+                                        Iniciar material
+                                    {% endif %}
+                                </a>
+                            {% else %}
+                                <span class="lock-hint">🔒 Bloqueado</span>
+                            {% endif %}
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state-mini">
+                <p class="muted">O professor ainda não publicou nenhum material para esta disciplina.</p>
+            </div>
+        {% endif %}
     </div>
 </section>
 {% endblock %}

@@ -1,63 +1,63 @@
 {% extends 'base.html' %}
 
-{% block title %}Meus certificados | SaberHub{% endblock %}
+{% block title %}Meus Certificados | SaberHub{% endblock %}
 
 {% block page_class %}page-app{% endblock %}
 
 {% block content %}
 <section class="shell">
-    <div class="topbar">
-        <div>
-            <p class="eyebrow">SaberHub</p>
-            <h1>Meus certificados</h1>
+    <div class="page-hero">
+        <div class="hero-content">
+            <span class="hero-badge">Conquistas Acadêmicas</span>
+            <h1>Meus Certificados</h1>
+            <p class="hero-subtext">Comprovantes de conclusão das disciplinas finalizadas com sucesso no SaberHub.</p>
         </div>
-
-        <div class="topbar-actions">
-            <a class="button button-secondary" href="{% url 'home' %}">Inicio</a>
-            <a class="button button-secondary" href="{% url 'enrolled_course_list' %}">Meus cursos</a>
-            <a class="button button-secondary" href="{% url 'student_report' %}">Informes</a>
-            <a class="button button-secondary" href="{% url 'profile' %}">Perfil</a>
-        </div>
-    </div>
-
-    <div class="section-heading">
-        <div>
-            <h2>Certificados emitidos</h2>
-            <p class="muted">Veja os cursos que voce concluiu na plataforma.</p>
+        <div class="hero-actions">
+            <a class="button button-secondary" href="{% url 'enrolled_course_list' %}">Meus Cursos em Andamento</a>
         </div>
     </div>
 
     {% if certificates %}
-        <div class="certificate-list">
+        <div class="certificates-grid">
             {% for certificate in certificates %}
-                <article class="certificate-item">
-                    <div>
-                        <span>Certificado</span>
-                        <h2>{{ certificate.course.title }}</h2>
+                <article class="certificate-diploma-card">
+                    <div class="diploma-border-inner">
+                        <div class="diploma-header">
+                            <span class="diploma-seal">🏆</span>
+                            <span class="diploma-eyebrow">Certificado de Conclusão</span>
+                            <h2 class="diploma-course">{{ certificate.course.title }}</h2>
+                        </div>
+
+                        <p class="diploma-statement">{{ certificate.display_text }}</p>
+
+                        <div class="diploma-details-grid">
+                            <div class="diploma-detail">
+                                <span class="detail-label">Estudante</span>
+                                <strong class="detail-val">{{ certificate.student.get_full_name|default:certificate.student.username }}</strong>
+                            </div>
+                            <div class="diploma-detail">
+                                <span class="detail-label">Professor</span>
+                                <strong class="detail-val">{{ certificate.course.teacher.get_full_name|default:certificate.course.teacher.username }}</strong>
+                            </div>
+                            <div class="diploma-detail">
+                                <span class="detail-label">Data de Emissão</span>
+                                <strong class="detail-val">{{ certificate.created_at|date:"d/m/Y" }}</strong>
+                            </div>
+                            <div class="diploma-detail">
+                                <span class="detail-label">Autenticidade</span>
+                                <strong class="detail-val status-val-verified">✓ Verificado</strong>
+                            </div>
+                        </div>
                     </div>
-                    <p>{{ certificate.display_text }}</p>
-                    <dl class="certificate-meta">
-                        <div>
-                            <dt>Aluno</dt>
-                            <dd>{{ certificate.student.get_full_name|default:certificate.student.username }}</dd>
-                        </div>
-                        <div>
-                            <dt>Curso</dt>
-                            <dd>{{ certificate.course.title }}</dd>
-                        </div>
-                        <div>
-                            <dt>Emissao</dt>
-                            <dd>{{ certificate.created_at|date:"d/m/Y" }}</dd>
-                        </div>
-                    </dl>
                 </article>
             {% endfor %}
         </div>
     {% else %}
-        <div class="panel">
-            <h2>Nenhum certificado emitido</h2>
-            <p class="muted">Quando voce concluir todos os materiais de um curso, seu certificado aparecera aqui.</p>
-            <a class="button" href="{% url 'enrolled_course_list' %}">Ver meus cursos</a>
+        <div class="empty-state-panel">
+            <div class="empty-state-icon">🎓</div>
+            <h3>Nenhum certificado emitido ainda</h3>
+            <p class="muted">Para obter seu primeiro certificado, conclua todos os materiais didáticos de qualquer um dos seus cursos.</p>
+            <a class="button button-primary" href="{% url 'enrolled_course_list' %}">Acessar meus cursos</a>
         </div>
     {% endif %}
 </section>

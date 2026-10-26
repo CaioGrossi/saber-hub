@@ -1,112 +1,174 @@
 {% extends 'base.html' %}
 
-{% block title %}SaberHub{% endblock %}
+{% block title %}Início | SaberHub{% endblock %}
 
 {% block page_class %}page-app{% endblock %}
 
 {% block content %}
 <section class="shell">
-    <div class="topbar">
-        <div>
-            <p class="eyebrow">SaberHub</p>
-            <h1>Bem-vindo, {{ request.user.username }}</h1>
+    <div class="page-hero">
+        <div class="hero-content">
+            <span class="hero-badge">Plataforma Educacional</span>
+            <h1>Bem-vindo, {{ request.user.first_name|default:request.user.username }}!</h1>
+            <p class="hero-subtext">
+                {% if request.user.role == 'teacher' %}
+                    Gerencie seus cursos cadastrados, adicione novos materiais e acompanhe o engajamento dos seus alunos.
+                {% else %}
+                    Explore os cursos disponíveis na plataforma, desenvolva novas habilidades e conquiste certificados.
+                {% endif %}
+            </p>
         </div>
 
-        <div class="topbar-actions">
-            {% if request.user.role == 'teacher' %}
+        {% if request.user.role == 'teacher' %}
+            <div class="hero-actions">
+                <a class="button button-primary" href="{% url 'create_course' %}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    <span>Criar novo curso</span>
+                </a>
+                <a class="button button-secondary" href="{% url 'teacher_report' %}">Ver informes</a>
                 <a class="button button-secondary" href="{% url 'course_list' %}">Meus cursos</a>
-                <a class="button button-secondary" href="{% url 'teacher_report' %}">Informes</a>
-                <a class="button" href="{% url 'create_course' %}">Criar curso</a>
-            {% else %}
-                <a class="button button-secondary" href="{% url 'enrolled_course_list' %}">Meus cursos</a>
-                <a class="button button-secondary" href="{% url 'student_report' %}">Informes</a>
-                <a class="button button-secondary" href="{% url 'certificate_list' %}">Certificados</a>
-            {% endif %}
-
-            <a class="button button-secondary" href="{% url 'profile' %}">Perfil</a>
-
-            <form method="post" action="{% url 'logout' %}">
-                {% csrf_token %}
-                <button class="button button-secondary" type="submit">Sair</button>
-            </form>
-        </div>
+            </div>
+        {% endif %}
     </div>
 
     {% if request.user.role == 'student' %}
-        <div class="section-heading">
-            <div>
-                <h2>Cursos disponiveis</h2>
-                <p class="muted">Veja os cursos cadastrados pelos professores da plataforma.</p>
+        <div class="section-toolbar">
+            <div class="section-heading">
+                <h2>Cursos Disponíveis</h2>
+                <p class="muted">Aprenda com professores de diversas instituições.</p>
             </div>
+
+            <form class="search-form" method="get">
+                <div class="search-box">
+                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input
+                        id="available-course-search"
+                        name="q"
+                        type="search"
+                        value="{{ search_query }}"
+                        placeholder="Buscar por título ou tema do curso..."
+                    >
+                    <button class="button button-sm button-primary" type="submit">Buscar</button>
+                    {% if search_query %}
+                        <a class="button button-sm button-ghost" href="{% url 'home' %}">Limpar</a>
+                    {% endif %}
+                </div>
+            </form>
         </div>
 
-        <form class="search-form" method="get">
-            <label for="available-course-search">Buscar curso por nome</label>
-            <div class="search-actions">
-                <input
-                    id="available-course-search"
-                    name="q"
-                    type="search"
-                    value="{{ search_query }}"
-                    placeholder="Digite o nome do curso"
-                >
-                <button class="button" type="submit">Buscar</button>
-                {% if search_query %}
-                    <a class="button button-secondary" href="{% url 'home' %}">Limpar</a>
-                {% endif %}
-            </div>
-        </form>
-
         {% if courses %}
-            <div class="course-list">
+            <div class="course-grid">
                 {% for course in courses %}
-                    <article class="course-item">
-                        <div>
-                            <h2>{{ course.title }}</h2>
+                    <article class="course-card {% if course.is_enrolled %}course-card-enrolled{% endif %}">
+                        <div class="card-header">
+                            <span class="course-chip">
+                                {% if course.is_enrolled %}
+                                    Inscrito
+                                {% else %}
+                                    Disponível
+                                {% endif %}
+                            </span>
+                            <div class="teacher-chip" title="Professor responsável">
+                                <span class="teacher-avatar">{{ course.teacher.username|slice:":1"|upper }}</span>
+                                <span class="teacher-name">{{ course.teacher.get_full_name|default:course.teacher.username }}</span>
+                            </div>
                         </div>
-                        <p>{{ course.description }}</p>
-                        <p class="course-teacher">Professor: {{ course.teacher.get_full_name|default:course.teacher.username }}</p>
+
+                        <div class="card-body">
+                            <h3 class="course-title">{{ course.title }}</h3>
+                            <p class="course-desc">{{ course.description }}</p>
+                        </div>
+
                         {% if course.is_enrolled %}
-                            <p class="course-progress">
-                                Progresso: {{ course.completed_materials_count }}/{{ course.total_materials }}
-                                materiais ({{ course.progress_percentage }}%)
-                            </p>
-                            <a class="button button-secondary" href="{% url 'student_course_detail' course.id %}">Continuar curso</a>
+                            <div class="progress-container">
+                                <div class="progress-labels">
+                                    <span class="progress-title">Progresso</span>
+                                    <span class="progress-val">{{ course.progress_percentage }}%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: {{ course.progress_percentage }}%;"></div>
+                                </div>
+                                <span class="progress-subtitle">{{ course.completed_materials_count }} de {{ course.total_materials }} materiais concluídos</span>
+                            </div>
+
+                            <div class="card-footer">
+                                <a class="button button-primary button-full" href="{% url 'student_course_detail' course.id %}">
+                                    Continuar curso
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="9 18 15 12 9 6"/>
+                                    </svg>
+                                </a>
+                            </div>
                         {% else %}
-                            <form method="post" action="{% url 'enroll_course' course.id %}">
-                                {% csrf_token %}
-                                <button class="button" type="submit">Inscrever-se</button>
-                            </form>
-                            <a class="button button-secondary" href="{% url 'student_course_detail' course.id %}">Ver detalhes</a>
+                            <div class="card-footer card-footer-split">
+                                <form method="post" action="{% url 'enroll_course' course.id %}" class="enroll-form">
+                                    {% csrf_token %}
+                                    <button class="button button-primary" type="submit">Inscrever-se</button>
+                                </form>
+                                <a class="button button-secondary" href="{% url 'student_course_detail' course.id %}">Ver detalhes</a>
+                            </div>
                         {% endif %}
                     </article>
                 {% endfor %}
             </div>
         {% else %}
-            <div class="panel">
+            <div class="empty-state-panel">
+                <div class="empty-state-icon">🔍</div>
                 {% if search_query %}
-                    <h2>Nenhum curso encontrado</h2>
-                    <p>Nenhum curso disponivel corresponde a "{{ search_query }}".</p>
+                    <h3>Nenhum curso encontrado</h3>
+                    <p class="muted">Nenhum curso corresponde à busca "{{ search_query }}".</p>
+                    <a class="button button-secondary" href="{% url 'home' %}">Ver todos os cursos</a>
                 {% else %}
-                    <h2>Nenhum curso disponivel</h2>
-                    <p>Quando professores criarem cursos, eles aparecerao aqui.</p>
+                    <h3>Nenhum curso disponível</h3>
+                    <p class="muted">Quando professores criarem cursos, eles aparecerão aqui para você se inscrever.</p>
                 {% endif %}
             </div>
         {% endif %}
     {% else %}
-        <div class="panel">
-            <h2>Plataforma de cursos</h2>
-            <p>
-                Este e o inicio do SaberHub. Aqui professores poderao criar cursos
-                e estudantes poderao encontrar aulas por tema.
-            </p>
-            <p>
-                Seu perfil atual: {{ request.user.get_role_display }} -
-                {{ request.user.college }}
-            </p>
-            <p>
-                Use os atalhos acima para criar cursos e acompanhar os cursos que voce ja cadastrou.
-            </p>
+        <div class="teacher-dashboard-panel">
+            <div class="dashboard-banner">
+                <div class="banner-text">
+                    <h2>Painel do Professor</h2>
+                    <p class="muted">
+                        Instituição vinculada: <strong>{{ request.user.college }}</strong>
+                    </p>
+                    <p>
+                        Cadastre novas disciplinas, adicione materiais de apoio (vídeos ou documentos em PDF) e consulte relatórios de progresso dos seus estudantes.
+                    </p>
+                </div>
+            </div>
+
+            <div class="teacher-quick-grid">
+                <a href="{% url 'course_list' %}" class="quick-card">
+                    <div class="quick-icon">📚</div>
+                    <div class="quick-info">
+                        <h3>Meus Cursos</h3>
+                        <p class="muted">Gerencie disciplinas, visualize e adicione novos materiais didáticos.</p>
+                    </div>
+                </a>
+
+                <a href="{% url 'create_course' %}" class="quick-card quick-card-highlight">
+                    <div class="quick-icon">✨</div>
+                    <div class="quick-info">
+                        <h3>Criar Novo Curso</h3>
+                        <p class="muted">Lance um novo curso com título, descrição e arquivos para seus alunos.</p>
+                    </div>
+                </a>
+
+                <a href="{% url 'teacher_report' %}" class="quick-card">
+                    <div class="quick-icon">📊</div>
+                    <div class="quick-info">
+                        <h3>Relatórios & Desempenho</h3>
+                        <p class="muted">Acompanhe matrículas, taxa de conclusão e certificados emitidos.</p>
+                    </div>
+                </a>
+            </div>
         </div>
     {% endif %}
 </section>

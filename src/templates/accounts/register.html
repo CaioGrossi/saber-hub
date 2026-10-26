@@ -1,61 +1,111 @@
 {% extends 'base.html' %}
 
-{% block title %}Criar conta | SaberHub{% endblock %}
+{% block title %}Criar Conta | SaberHub{% endblock %}
+
+{% block page_class %}page-auth{% endblock %}
 
 {% block content %}
-<section class="auth-card">
-    <div class="screen-nav">
-        <a class="button button-secondary" href="{% url 'home' %}">Inicio</a>
-    </div>
-
-    <p class="eyebrow">SaberHub</p>
-    <h1>Criar conta</h1>
-    <p class="muted">Cadastre-se para comecar a usar a plataforma.</p>
-
-    <form method="post" class="form">
-        {% csrf_token %}
-        {{ form.non_field_errors }}
-
-        <label for="{{ form.username.id_for_label }}">Usuario</label>
-        {{ form.username }}
-        {{ form.username.errors }}
-
-        <label for="{{ form.first_name.id_for_label }}">Nome</label>
-        {{ form.first_name }}
-        {{ form.first_name.errors }}
-
-        <label for="{{ form.last_name.id_for_label }}">Sobrenome</label>
-        {{ form.last_name }}
-        {{ form.last_name.errors }}
-
-        <label for="{{ form.role.id_for_label }}">Tipo de conta</label>
-        {{ form.role }}
-        {{ form.role.errors }}
-
-        <label for="{{ form.college_choice.id_for_label }}">Faculdade</label>
-        {{ form.college_choice }}
-        {{ form.college_choice.errors }}
-
-        <div class="college-name-field" data-college-name-field>
-            <label for="{{ form.college.id_for_label }}">Nome da faculdade</label>
-            {{ form.college }}
-            {{ form.college.errors }}
+<div class="auth-wrapper">
+    <div class="auth-card-modern auth-card-wide">
+        <div class="auth-header">
+            <div class="auth-brand-badge">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                    <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+                </svg>
+            </div>
+            <h1>Crie sua Conta no SaberHub</h1>
+            <p class="muted">Cadastre-se como professor ou estudante para aproveitar todos os recursos da plataforma.</p>
         </div>
 
-        <label for="{{ form.password1.id_for_label }}">Senha</label>
-        {{ form.password1 }}
-        {{ form.password1.errors }}
+        {% if form.non_field_errors %}
+            <div class="alert-danger">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
 
-        <label for="{{ form.password2.id_for_label }}">Confirmar senha</label>
-        {{ form.password2 }}
-        {{ form.password2.errors }}
+        <form method="post" class="auth-form">
+            {% csrf_token %}
 
-        <button class="button" type="submit">Criar conta</button>
-    </form>
+            <div class="form-grid-2col">
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}">Nome de Usuário <span class="required">*</span></label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <span class="field-error">{{ form.username.errors|striptags }}</span>
+                    {% endif %}
+                </div>
 
-    <p class="switch-link">
-        Ja tem uma conta?
-        <a href="{% url 'login' %}">Entrar</a>
-    </p>
-</section>
+                <div class="form-group">
+                    <label for="{{ form.role.id_for_label }}">Tipo de Conta <span class="required">*</span></label>
+                    {{ form.role }}
+                    {% if form.role.errors %}
+                        <span class="field-error">{{ form.role.errors|striptags }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-grid-2col">
+                <div class="form-group">
+                    <label for="{{ form.first_name.id_for_label }}">Primeiro Nome</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <span class="field-error">{{ form.first_name.errors|striptags }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.last_name.id_for_label }}">Sobrenome</label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <span class="field-error">{{ form.last_name.errors|striptags }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.college_choice.id_for_label }}">Vínculo com Faculdade <span class="required">*</span></label>
+                {{ form.college_choice }}
+                {% if form.college_choice.errors %}
+                    <span class="field-error">{{ form.college_choice.errors|striptags }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group college-name-field" data-college-name-field>
+                <label for="{{ form.college.id_for_label }}">Nome da Faculdade / Universidade</label>
+                {{ form.college }}
+                {% if form.college.errors %}
+                    <span class="field-error">{{ form.college.errors|striptags }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-grid-2col">
+                <div class="form-group">
+                    <label for="{{ form.password1.id_for_label }}">Senha <span class="required">*</span></label>
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}
+                        <span class="field-error">{{ form.password1.errors|striptags }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.password2.id_for_label }}">Confirmar Senha <span class="required">*</span></label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                        <span class="field-error">{{ form.password2.errors|striptags }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <button class="button button-primary button-full button-lg" type="submit">Finalizar Cadastro</button>
+        </form>
+
+        <div class="auth-footer">
+            <p class="switch-link">
+                Já possui uma conta?
+                <a href="{% url 'login' %}">Fazer login</a>
+            </p>
+        </div>
+    </div>
+</div>
 {% endblock %}

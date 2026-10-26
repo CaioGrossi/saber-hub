@@ -1,51 +1,70 @@
 {% extends 'base.html' %}
 
-{% block title %}Informes do professor | SaberHub{% endblock %}
+{% block title %}Informes do Professor | SaberHub{% endblock %}
 
 {% block page_class %}page-app{% endblock %}
 
 {% block content %}
 <section class="shell">
-    <div class="topbar">
-        <div>
-            <p class="eyebrow">SaberHub</p>
-            <h1>Informes do professor</h1>
+    <div class="page-hero">
+        <div class="hero-content">
+            <span class="hero-badge">Analytics & Métricas</span>
+            <h1>Informes e Desempenho Docente</h1>
+            <p class="hero-subtext">Visão analítica de matrículas, retenção, conclusão e emissão de certificados dos seus cursos.</p>
         </div>
-
-        <div class="topbar-actions">
+        <div class="hero-actions">
+            <a class="button button-primary" href="{% url 'create_course' %}">+ Novo curso</a>
             <a class="button button-secondary" href="{% url 'course_list' %}">Meus cursos</a>
-            <a class="button button-secondary" href="{% url 'home' %}">Inicio</a>
         </div>
     </div>
 
-    <section class="report-summary" aria-label="Resumo dos informes">
-        <article class="metric-card">
-            <span>Cursos criados</span>
-            <strong>{{ total_courses }}</strong>
+    <section class="metrics-dashboard-grid" aria-label="Métricas principais">
+        <article class="stat-card">
+            <div class="stat-icon-wrap stat-icon-blue">📚</div>
+            <div class="stat-info">
+                <span class="stat-label">Cursos Criados</span>
+                <strong class="stat-number">{{ total_courses }}</strong>
+            </div>
         </article>
-        <article class="metric-card">
-            <span>Inscricoes</span>
-            <strong>{{ total_enrollments }}</strong>
+
+        <article class="stat-card">
+            <div class="stat-icon-wrap stat-icon-indigo">👥</div>
+            <div class="stat-info">
+                <span class="stat-label">Total de Inscrições</span>
+                <strong class="stat-number">{{ total_enrollments }}</strong>
+            </div>
         </article>
-        <article class="metric-card">
-            <span>Alunos unicos</span>
-            <strong>{{ total_students }}</strong>
+
+        <article class="stat-card">
+            <div class="stat-icon-wrap stat-icon-cyan">🎓</div>
+            <div class="stat-info">
+                <span class="stat-label">Alunos Únicos</span>
+                <strong class="stat-number">{{ total_students }}</strong>
+            </div>
         </article>
-        <article class="metric-card">
-            <span>Alunos concluintes</span>
-            <strong>{{ completed_students_count }}</strong>
+
+        <article class="stat-card">
+            <div class="stat-icon-wrap stat-icon-emerald">🏆</div>
+            <div class="stat-info">
+                <span class="stat-label">Alunos Concluintes</span>
+                <strong class="stat-number">{{ completed_students_count }}</strong>
+            </div>
         </article>
-        <article class="metric-card">
-            <span>Certificados emitidos</span>
-            <strong>{{ total_certificates }}</strong>
+
+        <article class="stat-card">
+            <div class="stat-icon-wrap stat-icon-amber">📜</div>
+            <div class="stat-info">
+                <span class="stat-label">Certificados Emitidos</span>
+                <strong class="stat-number">{{ total_certificates }}</strong>
+            </div>
         </article>
     </section>
 
-    <section class="panel report-panel">
-        <div class="section-heading">
+    <section class="panel-card table-panel">
+        <div class="panel-card-header">
             <div>
-                <h2>Cursos por desempenho</h2>
-                <p class="muted">Cursos ordenados por quantidade de alunos inscritos e concluintes.</p>
+                <h2>Desempenho por Curso</h2>
+                <p class="muted">Lista de cursos ordenada por quantidade de estudantes inscritos e concluintes.</p>
             </div>
         </div>
 
@@ -54,34 +73,42 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Curso</th>
-                            <th>Materiais</th>
-                            <th>Alunos inscritos</th>
-                            <th>Alunos concluintes</th>
+                            <th>Título do Curso</th>
+                            <th>Materiais Cadastrados</th>
+                            <th>Estudantes Matriculados</th>
+                            <th>Estudantes Concluintes</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for course in course_rows %}
                             <tr>
-                                <td>{{ course.title }}</td>
-                                <td>{{ course.materials_count }}</td>
-                                <td>{{ course.enrolled_students }}</td>
-                                <td>{{ course.completed_students }}</td>
+                                <td class="table-cell-bold">{{ course.title }}</td>
+                                <td><span class="pill-badge pill-neutral">{{ course.materials_count }} materiais</span></td>
+                                <td><span class="pill-badge pill-primary">{{ course.enrolled_students }} alunos</span></td>
+                                <td>
+                                    {% if course.completed_students > 0 %}
+                                        <span class="pill-badge pill-success">{{ course.completed_students }} formados</span>
+                                    {% else %}
+                                        <span class="pill-badge pill-muted">0 formados</span>
+                                    {% endif %}
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         {% else %}
-            <p class="muted">Nenhum curso criado ainda.</p>
+            <div class="empty-state-mini">
+                <p class="muted">Nenhum curso cadastrado ainda.</p>
+            </div>
         {% endif %}
     </section>
 
-    <section class="panel report-panel">
-        <div class="section-heading">
+    <section class="panel-card table-panel">
+        <div class="panel-card-header">
             <div>
-                <h2>Cursos que precisam de atencao</h2>
-                <p class="muted">Cursos com alunos inscritos e taxa de conclusao abaixo de 50%.</p>
+                <h2>Cursos que Precisam de Atenção</h2>
+                <p class="muted">Disciplinas com alunos inscritos mas com taxa de conclusão inferior a 50%.</p>
             </div>
         </div>
 
@@ -91,33 +118,37 @@
                     <thead>
                         <tr>
                             <th>Curso</th>
-                            <th>Alunos inscritos</th>
-                            <th>Alunos concluintes</th>
-                            <th>Taxa de conclusao</th>
+                            <th>Alunos Inscritos</th>
+                            <th>Alunos Concluintes</th>
+                            <th>Taxa de Conclusão</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for course in attention_rows %}
                             <tr>
-                                <td>{{ course.title }}</td>
+                                <td class="table-cell-bold">{{ course.title }}</td>
                                 <td>{{ course.enrolled_students }}</td>
                                 <td>{{ course.completed_students }}</td>
-                                <td>{{ course.completion_rate }}%</td>
+                                <td>
+                                    <span class="pill-badge pill-warning">{{ course.completion_rate }}%</span>
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         {% else %}
-            <p class="muted">Nenhum curso com baixa taxa de conclusao no momento.</p>
+            <div class="empty-state-mini">
+                <p class="muted">Parabéns! Nenhum curso seu apresenta baixa taxa de conclusão no momento.</p>
+            </div>
         {% endif %}
     </section>
 
-    <section class="panel report-panel">
-        <div class="section-heading">
+    <section class="panel-card table-panel">
+        <div class="panel-card-header">
             <div>
-                <h2>Alunos que concluiram cursos</h2>
-                <p class="muted">Alunos que finalizaram pelo menos um dos seus cursos.</p>
+                <h2>Alunos Concluintes</h2>
+                <p class="muted">Lista de estudantes que completaram com êxito pelo menos um de seus cursos.</p>
             </div>
         </div>
 
@@ -126,24 +157,26 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Aluno</th>
-                            <th>Email</th>
-                            <th>Cursos concluidos</th>
+                            <th>Estudante</th>
+                            <th>Email de Contato</th>
+                            <th>Cursos Concluídos</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for student in student_rows %}
                             <tr>
-                                <td>{{ student.get_full_name|default:student.username }}</td>
-                                <td>{{ student.email|default:"-" }}</td>
-                                <td>{{ student.completed_courses }}</td>
+                                <td class="table-cell-bold">{{ student.get_full_name|default:student.username }}</td>
+                                <td class="muted">{{ student.email|default:"-" }}</td>
+                                <td><span class="pill-badge pill-success">{{ student.completed_courses }} curso(s)</span></td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         {% else %}
-            <p class="muted">Nenhum aluno concluiu cursos seus ainda.</p>
+            <div class="empty-state-mini">
+                <p class="muted">Nenhum estudante completou seus cursos até o momento.</p>
+            </div>
         {% endif %}
     </section>
 </section>

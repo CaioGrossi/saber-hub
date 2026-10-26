@@ -1,44 +1,54 @@
 {% extends 'base.html' %}
 
-{% block title %}Meus informes | SaberHub{% endblock %}
+{% block title %}Meus Informes | SaberHub{% endblock %}
 
 {% block page_class %}page-app{% endblock %}
 
 {% block content %}
 <section class="shell">
-    <div class="topbar">
-        <div>
-            <p class="eyebrow">SaberHub</p>
-            <h1>Meus informes</h1>
+    <div class="page-hero">
+        <div class="hero-content">
+            <span class="hero-badge">Acompanhamento do Aluno</span>
+            <h1>Meus Informes & Desempenho</h1>
+            <p class="hero-subtext">Visão detalhada sobre seu progresso acadêmico, materiais estudados e metas de conclusão.</p>
         </div>
-
-        <div class="topbar-actions">
-            <a class="button button-secondary" href="{% url 'enrolled_course_list' %}">Meus cursos</a>
-            <a class="button button-secondary" href="{% url 'certificate_list' %}">Certificados</a>
-            <a class="button button-secondary" href="{% url 'home' %}">Inicio</a>
+        <div class="hero-actions">
+            <a class="button button-primary" href="{% url 'enrolled_course_list' %}">Ir para meus cursos</a>
+            <a class="button button-secondary" href="{% url 'certificate_list' %}">Ver certificados</a>
         </div>
     </div>
 
-    <section class="report-summary" aria-label="Resumo dos informes">
-        <article class="metric-card">
-            <span>Cursos inscritos</span>
-            <strong>{{ total_enrolled_courses }}</strong>
+    <section class="metrics-dashboard-grid" aria-label="Resumo acadêmico">
+        <article class="stat-card">
+            <div class="stat-icon-wrap stat-icon-blue">📚</div>
+            <div class="stat-info">
+                <span class="stat-label">Cursos Matriculados</span>
+                <strong class="stat-number">{{ total_enrolled_courses }}</strong>
+            </div>
         </article>
-        <article class="metric-card">
-            <span>Cursos concluidos</span>
-            <strong>{{ completed_courses_count }}</strong>
+
+        <article class="stat-card">
+            <div class="stat-icon-wrap stat-icon-emerald">🏆</div>
+            <div class="stat-info">
+                <span class="stat-label">Cursos Concluídos</span>
+                <strong class="stat-number">{{ completed_courses_count }}</strong>
+            </div>
         </article>
-        <article class="metric-card">
-            <span>Em andamento</span>
-            <strong>{{ in_progress_courses_count }}</strong>
+
+        <article class="stat-card">
+            <div class="stat-icon-wrap stat-icon-amber">⏳</div>
+            <div class="stat-info">
+                <span class="stat-label">Em Andamento</span>
+                <strong class="stat-number">{{ in_progress_courses_count }}</strong>
+            </div>
         </article>
     </section>
 
-    <section class="panel report-panel">
-        <div class="section-heading">
+    <section class="panel-card table-panel">
+        <div class="panel-card-header">
             <div>
-                <h2>Progresso por curso</h2>
-                <p class="muted">Acompanhe seus cursos, professores e progresso em materiais.</p>
+                <h2>Progresso Geral por Disciplina</h2>
+                <p class="muted">Status de conclusão dos materiais para cada curso em que você está matriculado.</p>
             </div>
         </div>
 
@@ -49,7 +59,7 @@
                         <tr>
                             <th>Curso</th>
                             <th>Professor</th>
-                            <th>Materiais concluidos</th>
+                            <th>Materiais Concluídos</th>
                             <th>Progresso</th>
                             <th>Status</th>
                         </tr>
@@ -57,15 +67,22 @@
                     <tbody>
                         {% for enrollment in enrollment_rows %}
                             <tr>
-                                <td>{{ enrollment.course.title }}</td>
-                                <td>{{ enrollment.course.teacher.get_full_name|default:enrollment.course.teacher.username }}</td>
-                                <td>{{ enrollment.completed_materials_count }}/{{ enrollment.total_materials }}</td>
-                                <td>{{ enrollment.progress_percentage }}%</td>
+                                <td class="table-cell-bold">{{ enrollment.course.title }}</td>
+                                <td class="muted">{{ enrollment.course.teacher.get_full_name|default:enrollment.course.teacher.username }}</td>
+                                <td>{{ enrollment.completed_materials_count }} / {{ enrollment.total_materials }}</td>
+                                <td>
+                                    <div class="table-progress-cell">
+                                        <div class="progress-bar progress-bar-inline">
+                                            <div class="progress-fill {% if enrollment.is_completed %}progress-fill-complete{% endif %}" style="width: {{ enrollment.progress_percentage }}%;"></div>
+                                        </div>
+                                        <span class="progress-pct">{{ enrollment.progress_percentage }}%</span>
+                                    </div>
+                                </td>
                                 <td>
                                     {% if enrollment.is_completed %}
-                                        Concluido
+                                        <span class="pill-badge pill-success">✓ Concluído</span>
                                     {% else %}
-                                        Em andamento
+                                        <span class="pill-badge pill-warning">Em andamento</span>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -74,15 +91,17 @@
                 </table>
             </div>
         {% else %}
-            <p class="muted">Voce ainda nao esta inscrito em cursos.</p>
+            <div class="empty-state-mini">
+                <p class="muted">Você ainda não está matriculado em nenhum curso.</p>
+            </div>
         {% endif %}
     </section>
 
-    <section class="panel report-panel">
-        <div class="section-heading">
+    <section class="panel-card table-panel">
+        <div class="panel-card-header">
             <div>
-                <h2>Proximos cursos para concluir</h2>
-                <p class="muted">Cursos em andamento ordenados pelo maior progresso atual.</p>
+                <h2>Próximos Cursos para Concluir</h2>
+                <p class="muted">Disciplinas em andamento ordenadas pelo maior percentual já concluído.</p>
             </div>
         </div>
 
@@ -93,32 +112,41 @@
                         <tr>
                             <th>Curso</th>
                             <th>Professor</th>
-                            <th>Progresso</th>
-                            <th>Materiais restantes</th>
+                            <th>Progresso Atual</th>
+                            <th>Materiais Restantes</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for enrollment in next_course_rows %}
                             <tr>
-                                <td>{{ enrollment.course.title }}</td>
-                                <td>{{ enrollment.course.teacher.get_full_name|default:enrollment.course.teacher.username }}</td>
-                                <td>{{ enrollment.progress_percentage }}%</td>
-                                <td>{{ enrollment.remaining_materials_count }}</td>
+                                <td class="table-cell-bold">{{ enrollment.course.title }}</td>
+                                <td class="muted">{{ enrollment.course.teacher.get_full_name|default:enrollment.course.teacher.username }}</td>
+                                <td>
+                                    <div class="table-progress-cell">
+                                        <div class="progress-bar progress-bar-inline">
+                                            <div class="progress-fill" style="width: {{ enrollment.progress_percentage }}%;"></div>
+                                        </div>
+                                        <span class="progress-pct">{{ enrollment.progress_percentage }}%</span>
+                                    </div>
+                                </td>
+                                <td><span class="pill-badge pill-primary">{{ enrollment.remaining_materials_count }} restante(s)</span></td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         {% else %}
-            <p class="muted">Nenhum curso em andamento para priorizar.</p>
+            <div class="empty-state-mini">
+                <p class="muted">Nenhum curso em andamento no momento.</p>
+            </div>
         {% endif %}
     </section>
 
-    <section class="panel report-panel">
-        <div class="section-heading">
+    <section class="panel-card table-panel">
+        <div class="panel-card-header">
             <div>
-                <h2>Professores com mais cursos para voce</h2>
-                <p class="muted">Professores ordenados pela quantidade de cursos em que voce esta inscrito.</p>
+                <h2>Professores das Suas Disciplinas</h2>
+                <p class="muted">Professores ordenados pelo número de cursos em que você se inscreveu.</p>
             </div>
         </div>
 
@@ -128,23 +156,25 @@
                     <thead>
                         <tr>
                             <th>Professor</th>
-                            <th>Cursos inscritos</th>
-                            <th>Cursos concluidos</th>
+                            <th>Cursos Matriculados</th>
+                            <th>Cursos Finalizados</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for professor in professor_rows %}
                             <tr>
-                                <td>{{ professor.get_full_name|default:professor.username }}</td>
-                                <td>{{ professor.enrolled_courses }}</td>
-                                <td>{{ professor.completed_courses }}</td>
+                                <td class="table-cell-bold">{{ professor.get_full_name|default:professor.username }}</td>
+                                <td><span class="pill-badge pill-neutral">{{ professor.enrolled_courses }} curso(s)</span></td>
+                                <td><span class="pill-badge pill-success">{{ professor.completed_courses }} concluído(s)</span></td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         {% else %}
-            <p class="muted">Quando voce se inscrever em cursos, os professores aparecerao aqui.</p>
+            <div class="empty-state-mini">
+                <p class="muted">Quando você se matricular em cursos, os professores correspondentes aparecerão aqui.</p>
+            </div>
         {% endif %}
     </section>
 </section>
