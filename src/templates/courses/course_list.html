@@ -65,7 +65,10 @@
                 <article class="course-card">
                     <div class="card-header">
                         <span class="course-chip course-chip-teacher">Docência</span>
-                        <span class="badge-count">{{ course.materials.count }} materiais</span>
+                        <div class="header-tags">
+                            <span class="price-chip">R$ {{ course.price }}</span>
+                            <span class="badge-count">{{ course.materials.count }} materiais</span>
+                        </div>
                     </div>
 
                     <div class="card-body">

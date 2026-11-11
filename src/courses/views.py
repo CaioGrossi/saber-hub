@@ -1,8 +1,9 @@
+from decimal import Decimal
 import mimetypes
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Sum
 from django.http import FileResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.clickjacking import xframe_options_sameorigin
@@ -10,8 +11,15 @@ from django.views.decorators.http import require_POST
 
 from accounts.models import User
 
-from .forms import CourseForm, CourseMaterialForm
-from .models import Certificate, CompletedMaterial, Course, CourseEnrollment, CourseMaterial
+from .forms import CourseForm, CourseMaterialForm, CreditCardPurchaseForm
+from .models import (
+    Certificate,
+    CompletedMaterial,
+    Course,
+    CourseEnrollment,
+    CourseMaterial,
+    CoursePurchase,
+)
 
 
 def teacher_required(view_func):
@@ -130,6 +138,31 @@ def teacher_report(request):
         .annotate(completed_courses=Count('certificates__course', distinct=True))
         .order_by('-completed_courses', 'username')
     )
+
+    # Financial / Sales metrics
+    purchases_qs = CoursePurchase.objects.filter(course__teacher=request.user)
+    total_revenue = purchases_qs.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+    total_sales_count = purchases_qs.count()
+    average_ticket = (total_revenue / total_sales_count) if total_sales_count > 0 else Decimal('0.00')
+
+    revenue_by_course = {
+        item['course_id']: {
+            'count': item['count'],
+            'total': item['total'] or Decimal('0.00'),
+        }
+        for item in (
+            purchases_qs
+            .values('course_id')
+            .annotate(total=Sum('amount'), count=Count('id'))
+        )
+    }
+
+    recent_purchases = (
+        purchases_qs
+        .select_related('course', 'student')
+        .order_by('-created_at')[:10]
+    )
+
     attention_rows = []
     for course in course_rows:
         course.completion_rate = 0
@@ -140,17 +173,25 @@ def teacher_report(request):
         if course.enrolled_students and course.completion_rate < 50:
             attention_rows.append(course)
 
+        rev_data = revenue_by_course.get(course.id, {'count': 0, 'total': Decimal('0.00')})
+        course.sales_count = rev_data['count']
+        course.total_revenue = rev_data['total']
+
     return render(
         request,
         'courses/teacher_report.html',
         {
             'attention_rows': attention_rows,
+            'average_ticket': average_ticket,
             'completed_students_count': certificates.values('student').distinct().count(),
             'course_rows': course_rows,
+            'recent_purchases': recent_purchases,
             'student_rows': student_rows,
             'total_certificates': certificates.count(),
             'total_courses': course_rows.count(),
             'total_enrollments': enrollments.count(),
+            'total_revenue': total_revenue,
+            'total_sales_count': total_sales_count,
             'total_students': enrollments.values('student').distinct().count(),
         },
     )
@@ -343,20 +384,61 @@ def student_course_material_file(request, course_id, material_id):
 
 
 @student_required
+def purchase_course(request, course_id):
+    course = get_object_or_404(
+        Course.objects.select_related('teacher'),
+        id=course_id,
+    )
+
+    if CourseEnrollment.objects.filter(student=request.user, course=course).exists():
+        messages.info(request, 'Você já possui acesso a este curso.')
+        return redirect('student_course_detail', course_id=course.id)
+
+    if request.method == 'POST':
+        form = CreditCardPurchaseForm(request.POST)
+        if form.is_valid():
+            CourseEnrollment.objects.get_or_create(
+                student=request.user,
+                course=course,
+            )
+            CoursePurchase.objects.create(
+                student=request.user,
+                course=course,
+                amount=course.price,
+                payment_method='credit_card',
+            )
+            messages.success(
+                request,
+                f'Pagamento aprovado com sucesso! Você adquiriu o curso "{course.title}". Bons estudos!',
+            )
+            return redirect('student_course_detail', course_id=course.id)
+        else:
+            messages.error(
+                request,
+                'Transação não autorizada. Verifique os dados do cartão informados.',
+            )
+    else:
+        form = CreditCardPurchaseForm()
+
+    return render(
+        request,
+        'courses/purchase_course.html',
+        {
+            'course': course,
+            'form': form,
+        },
+    )
+
+
+@student_required
 @require_POST
 def enroll_course(request, course_id):
     course = get_object_or_404(Course, id=course_id)
-    _, created = CourseEnrollment.objects.get_or_create(
-        student=request.user,
-        course=course,
-    )
+    if CourseEnrollment.objects.filter(student=request.user, course=course).exists():
+        messages.info(request, 'Você já está inscrito neste curso.')
+        return redirect('student_course_detail', course_id=course.id)
 
-    if created:
-        messages.success(request, 'Inscricao realizada com sucesso.')
-    else:
-        messages.info(request, 'Voce ja esta inscrito neste curso.')
-
-    return redirect('student_course_detail', course_id=course.id)
+    return redirect('purchase_course', course_id=course.id)
 
 
 @student_required

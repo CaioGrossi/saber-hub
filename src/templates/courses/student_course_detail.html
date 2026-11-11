@@ -24,6 +24,10 @@
                     <span class="meta-icon">📂</span>
                     Conteúdo: <strong>{{ materials.count }} materiais</strong>
                 </span>
+                <span class="meta-pill meta-pill-price">
+                    <span class="meta-icon">💳</span>
+                    Preço: <strong>R$ {{ course.price }}</strong>
+                </span>
             </div>
         </div>
 
@@ -36,14 +40,25 @@
                 {% endif %}
                 <a class="button button-secondary" href="{% url 'enrolled_course_list' %}">Meus Cursos</a>
             {% else %}
-                <form method="post" action="{% url 'enroll_course' course.id %}">
-                    {% csrf_token %}
-                    <button class="button button-primary button-lg" type="submit">Inscrever-se Gratuitamente</button>
-                </form>
+                <a class="button button-primary button-lg" href="{% url 'purchase_course' course.id %}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                        <line x1="1" y1="10" x2="23" y2="10"/>
+                    </svg>
+                    <span>Comprar Curso • R$ {{ course.price }}</span>
+                </a>
             {% endif %}
             <a class="button button-ghost" href="{% url 'home' %}">Voltar</a>
         </div>
     </div>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 
     {% if enrollment %}
         <div class="enrollment-status-banner">

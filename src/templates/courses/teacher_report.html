@@ -19,6 +19,14 @@
     </div>
 
     <section class="metrics-dashboard-grid" aria-label="Métricas principais">
+        <article class="stat-card stat-card-highlight">
+            <div class="stat-icon-wrap stat-icon-emerald">💰</div>
+            <div class="stat-info">
+                <span class="stat-label">Total Faturado</span>
+                <strong class="stat-number stat-number-currency">R$ {{ total_revenue|floatformat:2 }}</strong>
+            </div>
+        </article>
+
         <article class="stat-card">
             <div class="stat-icon-wrap stat-icon-blue">📚</div>
             <div class="stat-info">
@@ -28,10 +36,10 @@
         </article>
 
         <article class="stat-card">
-            <div class="stat-icon-wrap stat-icon-indigo">👥</div>
+            <div class="stat-icon-wrap stat-icon-indigo">💳</div>
             <div class="stat-info">
-                <span class="stat-label">Total de Inscrições</span>
-                <strong class="stat-number">{{ total_enrollments }}</strong>
+                <span class="stat-label">Vendas Realizadas</span>
+                <strong class="stat-number">{{ total_sales_count }}</strong>
             </div>
         </article>
 
@@ -58,6 +66,101 @@
                 <strong class="stat-number">{{ total_certificates }}</strong>
             </div>
         </article>
+    </section>
+
+    <!-- Seção de Faturamento e Vendas de Cursos -->
+    <section class="panel-card table-panel">
+        <div class="panel-card-header">
+            <div>
+                <h2>Faturamento com Venda de Cursos</h2>
+                <p class="muted">Acompanhamento financeiro da receita gerada pelas compras de seus cursos.</p>
+            </div>
+            <span class="price-chip">Faturamento Total: R$ {{ total_revenue|floatformat:2 }}</span>
+        </div>
+
+        <div class="financial-summary-grid">
+            <div class="financial-stat-box">
+                <span class="financial-stat-title">Faturamento Acumulado</span>
+                <strong class="financial-stat-value highlight-green">R$ {{ total_revenue|floatformat:2 }}</strong>
+                <span class="financial-stat-hint">Receita bruta de vendas</span>
+            </div>
+            <div class="financial-stat-box">
+                <span class="financial-stat-title">Total de Cursos Vendidos</span>
+                <strong class="financial-stat-value">{{ total_sales_count }}</strong>
+                <span class="financial-stat-hint">Compras confirmadas</span>
+            </div>
+            <div class="financial-stat-box">
+                <span class="financial-stat-title">Ticket Médio</span>
+                <strong class="financial-stat-value">R$ {{ average_ticket|floatformat:2 }}</strong>
+                <span class="financial-stat-hint">Média por curso vendido</span>
+            </div>
+        </div>
+
+        {% if course_rows %}
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Título do Curso</th>
+                            <th>Preço Unitário</th>
+                            <th>Vendas Realizadas</th>
+                            <th>Faturamento Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for course in course_rows %}
+                            <tr>
+                                <td class="table-cell-bold">{{ course.title }}</td>
+                                <td><span class="pill-badge pill-neutral">R$ {{ course.price }}</span></td>
+                                <td><span class="pill-badge pill-primary">{{ course.sales_count }} venda(s)</span></td>
+                                <td><span class="pill-badge pill-success">R$ {{ course.total_revenue|floatformat:2 }}</span></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state-mini">
+                <p class="muted">Nenhum curso cadastrado ainda para gerar faturamento.</p>
+            </div>
+        {% endif %}
+
+        {% if recent_purchases %}
+            <div class="panel-sub-section">
+                <div class="sub-section-header">
+                    <h3>Últimas Vendas Realizadas</h3>
+                    <p class="muted">Histórico recente de transações aprovadas por cartão de crédito.</p>
+                </div>
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Data da Compra</th>
+                                <th>Estudante</th>
+                                <th>Curso Adquirido</th>
+                                <th>Forma de Pagamento</th>
+                                <th>Valor Recebido</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for purchase in recent_purchases %}
+                                <tr>
+                                    <td class="muted">{{ purchase.created_at|date:"d/m/Y H:i" }}</td>
+                                    <td class="table-cell-bold">{{ purchase.student.get_full_name|default:purchase.student.username }}</td>
+                                    <td>{{ purchase.course.title }}</td>
+                                    <td>
+                                        <span class="pill-badge pill-neutral">
+                                            💳 Cartão de Crédito
+                                        </span>
+                                    </td>
+                                    <td><span class="pill-badge pill-success">R$ {{ purchase.amount|floatformat:2 }}</span></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
     </section>
 
     <section class="panel-card table-panel">

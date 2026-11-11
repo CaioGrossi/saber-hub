@@ -34,6 +34,14 @@
         {% endif %}
     </div>
 
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
     {% if request.user.role == 'student' %}
         <div class="section-toolbar">
             <div class="section-heading">
@@ -67,13 +75,18 @@
                 {% for course in courses %}
                     <article class="course-card {% if course.is_enrolled %}course-card-enrolled{% endif %}">
                         <div class="card-header">
-                            <span class="course-chip">
-                                {% if course.is_enrolled %}
-                                    Inscrito
-                                {% else %}
-                                    Disponível
+                            <div class="header-tags">
+                                <span class="course-chip">
+                                    {% if course.is_enrolled %}
+                                        Inscrito
+                                    {% else %}
+                                        Disponível
+                                    {% endif %}
+                                </span>
+                                {% if not course.is_enrolled %}
+                                    <span class="price-chip">R$ {{ course.price }}</span>
                                 {% endif %}
-                            </span>
+                            </div>
                             <div class="teacher-chip" title="Professor responsável">
                                 <span class="teacher-avatar">{{ course.teacher.username|slice:":1"|upper }}</span>
                                 <span class="teacher-name">{{ course.teacher.get_full_name|default:course.teacher.username }}</span>
@@ -107,10 +120,13 @@
                             </div>
                         {% else %}
                             <div class="card-footer card-footer-split">
-                                <form method="post" action="{% url 'enroll_course' course.id %}" class="enroll-form">
-                                    {% csrf_token %}
-                                    <button class="button button-primary" type="submit">Inscrever-se</button>
-                                </form>
+                                <a class="button button-primary" href="{% url 'purchase_course' course.id %}">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                                        <line x1="1" y1="10" x2="23" y2="10"/>
+                                    </svg>
+                                    <span>Comprar • R$ {{ course.price }}</span>
+                                </a>
                                 <a class="button button-secondary" href="{% url 'student_course_detail' course.id %}">Ver detalhes</a>
                             </div>
                         {% endif %}

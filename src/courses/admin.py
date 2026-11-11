@@ -1,11 +1,18 @@
 from django.contrib import admin
 
-from .models import Certificate, CompletedMaterial, Course, CourseEnrollment, CourseMaterial
+from .models import (
+    Certificate,
+    CompletedMaterial,
+    Course,
+    CourseEnrollment,
+    CourseMaterial,
+    CoursePurchase,
+)
 
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ('title', 'teacher')
+    list_display = ('title', 'teacher', 'price')
     search_fields = ('title', 'description', 'teacher__username')
 
 
@@ -37,4 +44,11 @@ class CompletedMaterialAdmin(admin.ModelAdmin):
 class CertificateAdmin(admin.ModelAdmin):
     list_display = ('student', 'course', 'created_at')
     list_filter = ('created_at',)
+    search_fields = ('student__username', 'student__email', 'course__title')
+
+
+@admin.register(CoursePurchase)
+class CoursePurchaseAdmin(admin.ModelAdmin):
+    list_display = ('student', 'course', 'amount', 'payment_method', 'created_at')
+    list_filter = ('created_at', 'payment_method')
     search_fields = ('student__username', 'student__email', 'course__title')

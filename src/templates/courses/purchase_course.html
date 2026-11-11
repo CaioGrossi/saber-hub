@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{% block title %}Comprar Curso: {{ course.title }} | SaberHub{% endblock %}
+
+{% block page_class %}page-app{% endblock %}
+
+{% block content %}
+<section class="shell">
+    <div class="page-hero">
+        <div class="hero-content">
+            <span class="hero-badge">Checkout Seguro</span>
+            <h1>Matrícula & Pagamento</h1>
+            <p class="hero-subtext">Você está prestes a adquirir acesso vitalício ao conteúdo completo desta disciplina.</p>
+        </div>
+        <div class="hero-actions">
+            <a class="button button-ghost" href="{% url 'student_course_detail' course.id %}">Voltar para a disciplina</a>
+        </div>
+    </div>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div class="checkout-layout-grid">
+        <!-- Resumo do Pedido -->
+        <aside class="panel-card checkout-summary-panel">
+            <div class="panel-card-header">
+                <h2>Resumo do Curso</h2>
+                <span class="price-chip">R$ {{ course.price }}</span>
+            </div>
+
+            <div class="checkout-course-details">
+                <h3 class="checkout-course-title">{{ course.title }}</h3>
+                <p class="checkout-course-desc muted">{{ course.description }}</p>
+
+                <div class="checkout-meta-list">
+                    <div class="spec-row">
+                        <span class="spec-title">Professor(a)</span>
+                        <strong class="spec-value">{{ course.teacher.get_full_name|default:course.teacher.username }}</strong>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-title">Instituição</span>
+                        <strong class="spec-value">{{ course.teacher.college }}</strong>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-title">Aulas e Materiais</span>
+                        <strong class="spec-value">{{ course.materials.count }} materiais</strong>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-title">Certificado de Conclusão</span>
+                        <strong class="spec-value text-success">Incluso</strong>
+                    </div>
+                </div>
+
+                <div class="checkout-total-box">
+                    <div class="total-row">
+                        <span>Total a pagar</span>
+                        <span class="total-amount">R$ {{ course.price }}</span>
+                    </div>
+                    <small class="muted">Pagamento em parcela única via Cartão de Crédito</small>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Formulário de Pagamento Mock -->
+        <section class="panel-card checkout-form-panel">
+            <div class="panel-card-header">
+                <div>
+                    <h2>Dados do Cartão de Crédito</h2>
+                    <p class="muted">Simulação de gateway de pagamento</p>
+                </div>
+            </div>
+
+            <!-- Caixa de Instruções de Teste -->
+            <div class="mock-test-credentials-box">
+                <div class="test-header">
+                    <span class="test-badge">Modo de Simulação</span>
+                    <button type="button" class="button button-sm button-ghost test-fill-btn" id="btn-fill-test-card">
+                        ⚡ Preencher dados de teste
+                    </button>
+                </div>
+                <p class="test-description">
+                    Utilize as seguintes credenciais aprovadas para simular a compra:
+                </p>
+                <div class="test-credentials-grid">
+                    <div class="cred-item">
+                        <span class="cred-label">PAN (Cartão):</span>
+                        <code class="cred-val">1111 1111 1111 1111</code>
+                    </div>
+                    <div class="cred-item">
+                        <span class="cred-label">Validade:</span>
+                        <code class="cred-val">08/30</code>
+                    </div>
+                    <div class="cred-item">
+                        <span class="cred-label">CVV:</span>
+                        <code class="cred-val">111</code>
+                    </div>
+                </div>
+            </div>
+
+            <form method="post" class="app-form checkout-form" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert-danger">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label for="{{ form.card_holder.id_for_label }}">
+                        Nome impresso no Cartão <span class="required">*</span>
+                    </label>
+                    {{ form.card_holder }}
+                    {% if form.card_holder.errors %}
+                        <span class="field-error">{{ form.card_holder.errors|striptags }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.pan.id_for_label }}">
+                        Número do Cartão de Crédito (PAN) <span class="required">*</span>
+                    </label>
+                    {{ form.pan }}
+                    {% if form.pan.errors %}
+                        <span class="field-error">{{ form.pan.errors|striptags }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="form-grid-2col">
+                    <div class="form-group">
+                        <label for="{{ form.expiration_date.id_for_label }}">
+                            Validade (MM/AA) <span class="required">*</span>
+                        </label>
+                        {{ form.expiration_date }}
+                        {% if form.expiration_date.errors %}
+                            <span class="field-error">{{ form.expiration_date.errors|striptags }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.cvv.id_for_label }}">
+                            Código CVV <span class="required">*</span>
+                        </label>
+                        {{ form.cvv }}
+                        {% if form.cvv.errors %}
+                            <span class="field-error">{{ form.cvv.errors|striptags }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="checkout-actions">
+                    <button class="button button-primary button-lg button-full" type="submit">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                            <line x1="1" y1="10" x2="23" y2="10"/>
+                        </svg>
+                        <span>Confirmar Pagamento • R$ {{ course.price }}</span>
+                    </button>
+                    <a class="button button-ghost button-full" href="{% url 'student_course_detail' course.id %}">
+                        Cancelar e voltar
+                    </a>
+                </div>
+
+                <div class="security-guarantee-note">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                    <span>Ambiente acadêmico seguro para simulação de compra de cursos.</span>
+                </div>
+            </form>
+        </section>
+    </div>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var btnFill = document.getElementById('btn-fill-test-card');
+        if (btnFill) {
+            btnFill.addEventListener('click', function () {
+                var inputHolder = document.getElementById('{{ form.card_holder.id_for_label }}');
+                var inputPan = document.getElementById('{{ form.pan.id_for_label }}');
+                var inputExp = document.getElementById('{{ form.expiration_date.id_for_label }}');
+                var inputCvv = document.getElementById('{{ form.cvv.id_for_label }}');
+
+                if (inputHolder && !inputHolder.value) {
+                    inputHolder.value = '{{ request.user.get_full_name|default:request.user.username|upper }}';
+                }
+                if (inputPan) inputPan.value = '1111 1111 1111 1111';
+                if (inputExp) inputExp.value = '08/30';
+                if (inputCvv) inputCvv.value = '111';
+            });
+        }
+    });
+</script>
+{% endblock %}

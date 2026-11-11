@@ -1,11 +1,14 @@
+from decimal import Decimal
+
 from django.core.management.base import BaseCommand
 from accounts.models import User
 from courses.models import (
-    Course,
-    CourseMaterial,
-    CourseEnrollment,
-    CompletedMaterial,
     Certificate,
+    CompletedMaterial,
+    Course,
+    CourseEnrollment,
+    CourseMaterial,
+    CoursePurchase,
 )
 
 
@@ -153,6 +156,7 @@ class Command(BaseCommand):
                 'teacher_username': 'prof.ana',
                 'title': 'Inteligência Artificial e Machine Learning',
                 'description': 'Introdução aos fundamentos da Inteligência Artificial, modelos de aprendizado de máquina supervisionado e não supervisionado, redes neurais e considerações éticas em sistemas modernos.',
+                'price': Decimal('149.90'),
                 'materials': [
                     {
                         'title': 'Fundamentos da Inteligência Artificial',
@@ -175,6 +179,7 @@ class Command(BaseCommand):
                 'teacher_username': 'grossi',
                 'title': 'Desenvolvimento Web com Python e Django',
                 'description': 'Aprenda a construir aplicações web robustas e escaláveis usando o Django. Do padrão MVT à criação de modelos, visualizações, rotas e formulários seguros.',
+                'price': Decimal('99.90'),
                 'materials': [
                     {
                         'title': 'Views e Roteamento de URLs',
@@ -197,6 +202,7 @@ class Command(BaseCommand):
                 'teacher_username': 'prof.carlos',
                 'title': 'Finanças Pessoais e Planejamento de Metas',
                 'description': 'Educação financeira essencial para o dia a dia. Aprenda a montar seu orçamento, construir uma reserva de emergência sólida e investir para atingir seus objetivos.',
+                'price': Decimal('49.90'),
                 'materials': [
                     {
                         'title': 'Orçamento Mensal Inteligente',
@@ -219,6 +225,7 @@ class Command(BaseCommand):
                 'teacher_username': 'prof.mariana',
                 'title': 'Design de Experiência do Usuário (UX/UI)',
                 'description': 'Metodologias práticas de Design Thinking e User Centered Design. Desde a pesquisa com usuários reais até a arquitetura da informação e criação de protótipos.',
+                'price': Decimal('79.90'),
                 'materials': [
                     {
                         'title': 'Pesquisa com Usuários e Personas',
@@ -241,6 +248,7 @@ class Command(BaseCommand):
                 'teacher_username': 'prof.roberto',
                 'title': 'Sustentabilidade e Gestão de Recursos Naturais',
                 'description': 'Fundamentos de responsabilidade socioambiental, preservação de ecossistemas, economia circular e implementação de projetos ecológicos em comunidades e empresas.',
+                'price': Decimal('59.90'),
                 'materials': [
                     {
                         'title': 'Consumo Consciente e Economia Circular',
@@ -263,6 +271,7 @@ class Command(BaseCommand):
                 'teacher_username': 'grossi',
                 'title': 'Análise e Estruturas de Algoritmos',
                 'description': 'Estudo aprofundado sobre eficiência de algoritmos computacionais, notação Big-O, busca, ordenação e estruturas de dados dinâmicas.',
+                'price': Decimal('119.90'),
                 'materials': [
                     {
                         'title': 'Introdução à Análise de Algoritmos',
@@ -286,13 +295,20 @@ class Command(BaseCommand):
         created_courses = []
         for c_data in courses_data:
             teacher = teachers[c_data['teacher_username']]
-            course, _ = Course.objects.get_or_create(
+            course, course_created = Course.objects.get_or_create(
                 teacher=teacher,
                 title=c_data['title'],
-                defaults={'description': c_data['description']},
+                defaults={
+                    'description': c_data['description'],
+                    'price': c_data['price'],
+                },
             )
+            if not course_created:
+                course.description = c_data['description']
+                course.price = c_data['price']
+                course.save()
             created_courses.append(course)
-            self.stdout.write(self.style.SUCCESS(f"Curso garantido: {course.title} (Prof: {teacher.get_full_name()})"))
+            self.stdout.write(self.style.SUCCESS(f"Curso garantido: {course.title} (R$ {course.price}) (Prof: {teacher.get_full_name()})"))
 
             for mat_data in c_data['materials']:
                 material, mat_created = CourseMaterial.objects.get_or_create(
@@ -375,6 +391,14 @@ class Command(BaseCommand):
             enrollment, _ = CourseEnrollment.objects.get_or_create(
                 student=student,
                 course=course,
+            )
+            CoursePurchase.objects.get_or_create(
+                student=student,
+                course=course,
+                defaults={
+                    'amount': course.price,
+                    'payment_method': 'credit_card',
+                },
             )
 
             materials = list(course.materials.all())

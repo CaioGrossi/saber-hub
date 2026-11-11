@@ -55,6 +55,18 @@
                 <span class="field-hint">Explique os objetivos de aprendizado, temas abordados e pré-requisitos.</span>
             </div>
 
+            <div class="form-group">
+                <label for="{{ form.price.id_for_label }}">Preço de Inscrição <span class="required">*</span></label>
+                <div class="price-input-wrapper">
+                    <span class="price-input-prefix">R$</span>
+                    {{ form.price }}
+                </div>
+                {% if form.price.errors %}
+                    <span class="field-error">{{ form.price.errors|striptags }}</span>
+                {% endif %}
+                <span class="field-hint">Defina o valor para os estudantes adquirirem seu curso (ex: 79.90 ou 0.00 se gratuito).</span>
+            </div>
+
             <div class="form-buttons-row">
                 <a class="button button-ghost" href="{% url 'course_list' %}">Cancelar</a>
                 <button class="button button-primary" type="submit">Salvar e Continuar</button>
