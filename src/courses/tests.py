@@ -61,9 +61,8 @@ class CoursePricingAndPurchaseTests(TestCase):
         self.client.login(username='aluno.test', password='password123')
         response = self.client.get(reverse('purchase_course', args=[self.course.id]))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, '1111 1111 1111 1111')
-        self.assertContains(response, '08/30')
-        self.assertContains(response, '111')
+        self.assertContains(response, 'Dados do Cartão de Crédito')
+        self.assertContains(response, 'Confirmar Pagamento')
         self.assertContains(response, 'R$ 129.90')
 
     def test_purchase_fails_with_invalid_card_details(self):

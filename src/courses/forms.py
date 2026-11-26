@@ -31,7 +31,7 @@ class CreditCardPurchaseForm(forms.Form):
         max_length=25,
         label='Número do Cartão (PAN)',
         widget=forms.TextInput(attrs={
-            'placeholder': '1111 1111 1111 1111',
+            'placeholder': '0000 0000 0000 0000',
             'autocomplete': 'cc-number',
             'maxlength': '25',
         }),
@@ -40,7 +40,7 @@ class CreditCardPurchaseForm(forms.Form):
         max_length=7,
         label='Data de Validade (MM/AA)',
         widget=forms.TextInput(attrs={
-            'placeholder': '08/30',
+            'placeholder': 'MM/AA',
             'autocomplete': 'cc-exp',
             'maxlength': '7',
         }),
@@ -49,7 +49,7 @@ class CreditCardPurchaseForm(forms.Form):
         max_length=4,
         label='Código CVV',
         widget=forms.TextInput(attrs={
-            'placeholder': '111',
+            'placeholder': '000',
             'autocomplete': 'cc-csc',
             'maxlength': '4',
         }),
@@ -63,18 +63,17 @@ class CreditCardPurchaseForm(forms.Form):
 
         errors = {}
         if pan != '1111111111111111':
-            errors['pan'] = 'Número de cartão inválido. Use 1111 1111 1111 1111 para aprovar.'
+            errors['pan'] = 'Número de cartão inválido.'
         if cvv != '111':
-            errors['cvv'] = 'CVV inválido. Use 111 para aprovar.'
+            errors['cvv'] = 'Código CVV inválido.'
         if exp not in ('08/30', '08/2030', '0830'):
-            errors['expiration_date'] = 'Data inválida. Use 08/30 para aprovar.'
+            errors['expiration_date'] = 'Data de validade inválida.'
 
         if errors:
             for field, msg in errors.items():
                 self.add_error(field, msg)
             raise forms.ValidationError(
-                'Transação não autorizada. Verifique os dados do cartão de crédito informado. '
-                'Para aprovação na simulação, utilize o cartão 1111 1111 1111 1111, CVV 111 e validade 08/30.'
+                'Transação não autorizada. Verifique os dados do cartão de crédito informado.'
             )
 
         return cleaned_data

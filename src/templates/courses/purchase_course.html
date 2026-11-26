@@ -66,39 +66,12 @@
             </div>
         </aside>
 
-        <!-- Formulário de Pagamento Mock -->
+        <!-- Formulário de Pagamento -->
         <section class="panel-card checkout-form-panel">
             <div class="panel-card-header">
                 <div>
                     <h2>Dados do Cartão de Crédito</h2>
-                    <p class="muted">Simulação de gateway de pagamento</p>
-                </div>
-            </div>
-
-            <!-- Caixa de Instruções de Teste -->
-            <div class="mock-test-credentials-box">
-                <div class="test-header">
-                    <span class="test-badge">Modo de Simulação</span>
-                    <button type="button" class="button button-sm button-ghost test-fill-btn" id="btn-fill-test-card">
-                        ⚡ Preencher dados de teste
-                    </button>
-                </div>
-                <p class="test-description">
-                    Utilize as seguintes credenciais aprovadas para simular a compra:
-                </p>
-                <div class="test-credentials-grid">
-                    <div class="cred-item">
-                        <span class="cred-label">PAN (Cartão):</span>
-                        <code class="cred-val">1111 1111 1111 1111</code>
-                    </div>
-                    <div class="cred-item">
-                        <span class="cred-label">Validade:</span>
-                        <code class="cred-val">08/30</code>
-                    </div>
-                    <div class="cred-item">
-                        <span class="cred-label">CVV:</span>
-                        <code class="cred-val">111</code>
-                    </div>
+                    <p class="muted">Pagamento seguro com cartão de crédito</p>
                 </div>
             </div>
 
@@ -173,31 +146,10 @@
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                         <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                     </svg>
-                    <span>Ambiente acadêmico seguro para simulação de compra de cursos.</span>
+                    <span>Ambiente seguro. Seus dados estão protegidos.</span>
                 </div>
             </form>
         </section>
     </div>
 </section>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var btnFill = document.getElementById('btn-fill-test-card');
-        if (btnFill) {
-            btnFill.addEventListener('click', function () {
-                var inputHolder = document.getElementById('{{ form.card_holder.id_for_label }}');
-                var inputPan = document.getElementById('{{ form.pan.id_for_label }}');
-                var inputExp = document.getElementById('{{ form.expiration_date.id_for_label }}');
-                var inputCvv = document.getElementById('{{ form.cvv.id_for_label }}');
-
-                if (inputHolder && !inputHolder.value) {
-                    inputHolder.value = '{{ request.user.get_full_name|default:request.user.username|upper }}';
-                }
-                if (inputPan) inputPan.value = '1111 1111 1111 1111';
-                if (inputExp) inputExp.value = '08/30';
-                if (inputCvv) inputCvv.value = '111';
-            });
-        }
-    });
-</script>
 {% endblock %}
